@@ -13,8 +13,8 @@
 <style>
   :root {
     --bg: #07080a;
-    --body: #0d0f12;
-    --rim: #1a1e24;
+    --body: #0a0c0f;
+    --rim: #121519;
     --screen: #0a0c0f;
     --text: #e6e8eb;
     --sub: #9aa3ae;
@@ -45,12 +45,13 @@
   }
 
   /* The radio: a silhouette barely above the dark, lit only at its edge and by its screen. */
+  .stage { width: 310px; height: 667px; flex: none; animation: rise 2.4s ease-out both; }
   .radio {
     position: relative;
     width: 200px;
     height: 430px;
-    flex: none;
-    animation: rise 2.4s ease-out both;
+    transform: scale(1.55);
+    transform-origin: top left;
   }
   .antenna, .knob, .knob2, .body {
     position: absolute;
@@ -63,20 +64,20 @@
   .body {
     left: 0; top: 84px; width: 200px; height: 346px;
     border-radius: 40px 40px 52px 52px;
-    box-shadow: inset 0 1px 0 #262b33, 0 30px 80px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 1px 0 #191d23, 0 40px 120px rgba(0, 0, 0, 0.7);
   }
   .led {
     position: absolute; left: 92px; top: 96px; width: 16px; height: 4px; border-radius: 2px;
-    background: #12321f;
+    background: #0c1a12;
     animation: led 6s ease-in-out infinite 2.6s;
   }
   .screen {
     position: absolute; left: 26px; top: 120px; width: 148px; height: 196px;
     border-radius: 6px;
     background: var(--screen);
-    border: 1px solid #14181e;
+    border: 1px solid #101317;
     overflow: hidden;
-    box-shadow: 0 0 40px rgba(77, 163, 255, 0.06);
+    box-shadow: 0 0 50px rgba(77, 163, 255, 0.04);
   }
   .glow {
     position: absolute; inset: 0;
@@ -101,7 +102,7 @@
     position: absolute; left: 26px; top: 330px; width: 148px;
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
   }
-  .keys i { display: block; height: 14px; border-radius: 4px; background: #101318; border: 1px solid #161a20; }
+  .keys i { display: block; height: 14px; border-radius: 4px; background: #0c0e12; border: 1px solid #111419; }
 
   .copy { max-width: 420px; text-align: left; animation: fade 2s ease-out both 0.6s; }
   .mark { display: flex; align-items: center; gap: 14px; }
@@ -133,25 +134,27 @@
 
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes wake { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes wake { from { opacity: 0; } to { opacity: 0.55; } }
   @keyframes blink { 50% { opacity: 0; } }
-  @keyframes led { 0%, 70%, 100% { background: #12321f; box-shadow: none; } 78%, 84% { background: #2fbf6a; box-shadow: 0 0 10px #2fbf6a; } }
+  @keyframes led { 0%, 70%, 100% { background: #0c1a12; box-shadow: none; } 78%, 84% { background: #1f7a46; box-shadow: 0 0 6px rgba(47, 191, 106, 0.5); } }
 
   @media (max-width: 720px) {
     main { flex-direction: column; gap: 36px; padding: 40px 16px 72px; }
+    .stage { width: 240px; height: 516px; }
+    .radio { transform: scale(1.2); }
     .copy { text-align: center; }
     .mark { justify-content: center; }
     .name { font-size: 44px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; }
-    .glow { opacity: 1; }
+    .glow { opacity: 0.55; }
   }
 </style>
 </head>
 <body>
 <main>
-  <div class="radio" aria-hidden="true">
+  <div class="stage" aria-hidden="true"><div class="radio">
     <div class="antenna"></div>
     <div class="knob"></div>
     <div class="knob2"></div>
@@ -159,7 +162,7 @@
     <div class="led"></div>
     <div class="screen">
       <div class="glow">
-        <div class="bar"><span>TW</span><span>VA7IF</span><span>▮</span></div>
+        <div class="bar"><span>TW</span><span>14:32</span><span>▮</span></div>
         <div class="card">
           <div class="head">A · 025 · Metro 2m</div>
           <div class="freq">147.340<span>00</span></div>
@@ -170,7 +173,7 @@
       </div>
     </div>
     <div class="keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  </div>
+  </div></div>
 
   <div class="copy">
     <div class="mark">
