@@ -55,7 +55,6 @@
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
   .card h3 { margin: 0 0 6px; font-size: 14px; }
-  .card h3 em { font-style: normal; font-weight: 400; color: var(--dim); }
   .card p { margin: 4px 0 0; color: var(--sub); font-size: 13px; }
   .card p em { font-style: normal; color: var(--dim); }
   .support { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 24px; }
@@ -111,7 +110,7 @@
 
 <script>
 // Edit the bench here. price: total paid in CAD including shipping and tax (the line, not each), or null until
-// known; approx: true for an estimate (shown with ~); status: "on order". group: "radios" or "test". Wish items
+// known; approx: true for an estimate (shown with ~). group: "radios" or "test". Wish items
 // take low/high estimates.
 const SUPPORT_URL = ""; // Patreon, Ko-fi or GitHub Sponsors link; the Helping out section stays hidden until set
 
@@ -119,9 +118,9 @@ const BENCH = [
   { item: "Radtel RT-950 Pro", qty: 2, price: 220, group: "radios",
     does: "The radio Ferrite runs on: one daily radio on the full-power build, one bench radio on the bench build.",
     use: "Everyday use finds most bugs; the bench radio runs the automated tests, keyed from the PC with no RF out." },
-  { item: "Radtel BJ-9000", qty: 1, price: null, group: "radios", status: "on order",
+  { item: "Radtel BJ-9000", qty: 1, price: null, group: "radios",
     does: "A sister model of the RT-950 Pro.", use: "Making sure Ferrite installs and runs on it too." },
-  { item: "Speaker mic", qty: 1, price: null, group: "radios",
+  { item: "Speaker mic", qty: 1, price: 30, group: "radios",
     does: "The side connector's speaker, mic and PTT.", use: "Audio routing and PTT tests." },
   { item: "RTL-SDR", qty: 1, price: 40, group: "test",
     does: "A software-defined receiver.", use: "Frequency, deviation, tones, DTMF and packets on air, read by the test tools." },
@@ -133,7 +132,7 @@ const BENCH = [
     does: "A 4-channel 250 MHz scope with a signal generator.", use: "Serial lines and audio paths on the board." },
   { item: "Fluke 289 multimeter", qty: 1, price: 400, group: "test",
     does: "A logging true-RMS multimeter.", use: "Battery readings and current draw over time." },
-  { item: "FNIRSI DPS-150 power supply", qty: 1, price: 120, group: "test",
+  { item: "FNIRSI DPS-150P power supply", qty: 1, price: 120, group: "test",
     does: "A small USB-C bench supply.", use: "Powering the radio without a battery." },
   { item: "Rigol DP832 power supply", qty: 1, price: 624.36, approx: true, group: "test",
     does: "A 3-channel programmable bench supply.", use: "Battery-level tests and current measurements." },
@@ -147,7 +146,7 @@ const WISH = [
 
 const GROUPS = { radios: "Radios", test: "Test equipment" };
 const usd = v => v == null ? "—" : "$" + v.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const cost = b => b.status && b.price == null ? b.status : (b.approx ? "~" : "") + usd(b.price);
+const cost = b => (b.approx ? "~" : "") + usd(b.price);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 const sum = g => BENCH.filter(b => !g || b.group === g).reduce((a, b) => a + (b.price || 0), 0);
@@ -166,7 +165,7 @@ rows += `<tr class="sum"><td>Total</td><td></td><td class="n">${usd(sum())}</td>
 document.getElementById("costs").innerHTML = rows;
 
 document.getElementById("cards").innerHTML = BENCH.map(b =>
-  `<div class="card"><h3>${esc(b.item)}${b.status ? ` <em>(${esc(b.status)})</em>` : ""}</h3><p>${esc(b.does)}</p><p><em>Used for:</em> ${esc(b.use)}</p></div>`).join("");
+  `<div class="card"><h3>${esc(b.item)}</h3><p>${esc(b.does)}</p><p><em>Used for:</em> ${esc(b.use)}</p></div>`).join("");
 
 const range = w => w.low == null ? "—" : w.high == null || w.high === w.low ? `about ${usd(w.low)}` : `${usd(w.low)} to ${usd(w.high)}`;
 document.getElementById("wish").innerHTML = `<tr><th>Item</th><th>Why</th><th class="n">Estimate</th></tr>` +
