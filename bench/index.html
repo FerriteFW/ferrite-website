@@ -110,7 +110,7 @@
 
 <script>
 // Edit the bench here. price: total paid in CAD including shipping and tax (the line, not each), or null until
-// known; approx: true for an estimate (shown with ~). group: "radios" or "test". Wish items
+// known; approx: true for an estimate (shown with ~). group: "radios", "test" or "cables". Wish items
 // take low/high estimates.
 const SUPPORT_URL = ""; // Patreon, Ko-fi or GitHub Sponsors link; the Helping out section stays hidden until set
 
@@ -136,6 +136,10 @@ const BENCH = [
     does: "A small USB-C bench supply.", use: "Powering the radio without a battery." },
   { item: "Rigol DP832 power supply", qty: 1, price: 624.36, approx: true, group: "test",
     does: "A 3-channel programmable bench supply.", use: "Battery-level tests and current measurements." },
+  { item: "BNC to BNC cable, 2 ft", qty: 2, price: 16, group: "cables",
+    does: "Short coax runs.", use: "Radio to dummy load, power meter and SDR." },
+  { item: "RF connector and adapter set", qty: 1, price: 36, group: "cables",
+    does: "SMA, BNC and other adapters.", use: "Connecting the radio's antenna port to the test gear." },
 ];
 
 const WISH = [
@@ -144,7 +148,7 @@ const WISH = [
   { item: "Spectrum analyser", low: null, high: null, why: "Harmonics and spurious emissions on transmit." },
 ];
 
-const GROUPS = { radios: "Radios", test: "Test equipment" };
+const GROUPS = { radios: "Radios", test: "Test equipment", cables: "Cables and connectors" };
 const usd = v => v == null ? "—" : "$" + v.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const cost = b => (b.approx ? "~" : "") + usd(b.price);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
