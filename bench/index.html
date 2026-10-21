@@ -102,12 +102,20 @@
   <section class="support" id="support">
     <h2><span>04</span>Donations</h2>
     <p class="lead">We believe making money from amateur radio goes against the community and the spirit of the
-      hobby. Ferrite is free and its source is open: read it, learn from it, build on it, and share what you make.
-      All we ask is that no one takes it and sells it.</p>
+      hobby. Ferrite is free, and its source is public: read it, learn from it, build on it for your own radios, and
+      share what you make. What it isn't for is taking and selling.</p>
     <p class="lead">We do love donations, though. They go back into the project: growing it, and more kit to hack on
       and share what we learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own
       radio and telling us what you find helps just as much.</p>
     <a class="btn" id="support-link" href="#" hidden>Donate</a>
+  </section>
+
+  <section class="support">
+    <h2><span>05</span>Radio makers</h2>
+    <p class="lead">We would be glad to work with a radio manufacturer. Hardware documentation, schematics or sample
+      units would let Ferrite support more radios and do it properly, and a maker who wants Ferrite on its radios can
+      license it from us. Either way, Ferrite stays free for the people who own the radios.</p>
+    <p class="lead" id="maker-contact" hidden>Get in touch: <a id="maker-link" href="#"></a></p>
   </section>
 
   <footer>ferritefw.dev · an independent project, not affiliated with Radtel · <span class="ca"><svg viewBox="0 0 9600 4800" width="18" height="9" role="img" aria-label="Canadian flag" fill="currentColor"><path d="M0 0h2400v4800H0zM7200 0h2400v4800H7200z"/><path d="M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg> Made in Canada</span></footer>
@@ -115,6 +123,7 @@
 
 <script>
 const SUPPORT_URL = ""; // the donation link; the button stays hidden until it is set
+const CONTACT = ""; // the makers' contact (an email address); the line stays hidden until it is set
 
 // The bench: price is what the line cost in CAD, shipping and tax included. group: "radios", "test" or "cables".
 const BENCH = [
@@ -177,6 +186,12 @@ const range = w => w.low == null ? "—" : w.high == null || w.high === w.low ? 
 document.getElementById("wish").innerHTML = `<tr><th>Item</th><th>Why</th><th class="n">Estimate</th></tr>` +
   WISH.map(w => `<tr><td>${esc(w.item)}</td><td>${esc(w.why)}</td><td class="n">${range(w)}</td></tr>`).join("");
 
+if (CONTACT) {
+  const l = document.getElementById("maker-link");
+  l.href = "mailto:" + CONTACT;
+  l.textContent = CONTACT;
+  document.getElementById("maker-contact").hidden = false;
+}
 if (SUPPORT_URL) {
   const a = document.getElementById("support-link");
   a.href = SUPPORT_URL;
