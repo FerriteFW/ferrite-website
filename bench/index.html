@@ -83,8 +83,9 @@
   </header>
 
   <h1>The bench</h1>
-  <p class="lead">Ferrite is a one-person project. This is the gear it is developed and tested with, what that has
-    cost so far, and what would help next. It is here so you can see what goes into the work.</p>
+  <p class="lead">Ferrite is built by a small group: a developer, testers running it on their own radios, and, we hope,
+    more contributors to come. This is the gear it is developed and tested with, what that has cost so far, and what
+    would help next. It is here so you can see what goes into the work.</p>
 
   <h2><span>01</span>What it has cost</h2>
   <div class="totals" id="totals"></div>
@@ -99,17 +100,21 @@
   <div class="tablewrap"><table id="wish"></table></div>
 
   <section class="support" id="support">
-    <h2><span>04</span>Helping out</h2>
-    <p class="lead">If Ferrite is useful to you and you'd like to help cover the bench, you can chip in here.
-      Reports from your own radio help just as much.</p>
-    <a class="btn" id="support-link" href="#">Support Ferrite</a>
+    <h2><span>04</span>Donations</h2>
+    <p class="lead">We believe making money from amateur radio goes against the community and the spirit of the
+      hobby. Ferrite is free and its source is open: read it, learn from it, build on it, and share what you make.
+      All we ask is that no one takes it and sells it.</p>
+    <p class="lead">We do love donations, though. They go back into the project: growing it, and more kit to hack on
+      and share what we learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own
+      radio and telling us what you find helps just as much.</p>
+    <a class="btn" id="support-link" href="#" hidden>Donate</a>
   </section>
 
-  <footer>ferritefw.dev · an independent project, not affiliated with Radtel · <span class="ca"><svg viewBox="0 0 9600 4800" width="18" height="9" role="img" aria-label="Canadian flag"><path fill="#d52b1e" d="m0 0h2400l99 99h4602l99-99h2400v4800h-2400l-99-99h-4602l-99 99H0z"/><path fill="#fff" d="m2400 0h4800v4800h-4800zm2490 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg> Made in Canada</span></footer>
+  <footer>ferritefw.dev · an independent project, not affiliated with Radtel · <span class="ca"><svg viewBox="0 0 9600 4800" width="18" height="9" role="img" aria-label="Canadian flag" fill="currentColor"><path d="M0 0h2400v4800H0zM7200 0h2400v4800H7200z"/><path d="M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg> Made in Canada</span></footer>
 </main>
 
 <script>
-const SUPPORT_URL = ""; // the support link; the Helping out section stays hidden until it is set
+const SUPPORT_URL = ""; // the donation link; the button stays hidden until it is set
 
 // The bench: price is what the line cost in CAD, shipping and tax included. group: "radios", "test" or "cables".
 const BENCH = [
@@ -172,8 +177,11 @@ const range = w => w.low == null ? "—" : w.high == null || w.high === w.low ? 
 document.getElementById("wish").innerHTML = `<tr><th>Item</th><th>Why</th><th class="n">Estimate</th></tr>` +
   WISH.map(w => `<tr><td>${esc(w.item)}</td><td>${esc(w.why)}</td><td class="n">${range(w)}</td></tr>`).join("");
 
-if (SUPPORT_URL) document.getElementById("support-link").href = SUPPORT_URL;
-else document.getElementById("support").hidden = true;
+if (SUPPORT_URL) {
+  const a = document.getElementById("support-link");
+  a.href = SUPPORT_URL;
+  a.hidden = false;
+}
 </script>
 </body>
 </html>
