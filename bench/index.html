@@ -42,6 +42,9 @@
   h2 span { color: var(--dim); margin-right: 10px; }
   .lead { color: var(--sub); max-width: 620px; }
   .note { color: var(--dim); font-size: 12px; }
+  .terms { color: var(--sub); max-width: 620px; padding-left: 18px; display: grid; gap: 8px; margin: 12px 0; }
+  .terms b { color: var(--text); font-weight: 600; }
+  .lead a { color: var(--blue); }
   .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 18px 0 8px; }
   .total { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
   .total b { display: block; font-size: 22px; font-weight: 700; }
@@ -99,19 +102,34 @@
   <p class="lead">What would let Ferrite be measured better, roughly in the order it would help.</p>
   <div class="tablewrap"><table id="wish"></table></div>
 
-  <section class="support" id="support">
-    <h2><span>04</span>Donations</h2>
+  <section class="support" id="licence">
+    <h2><span>04</span>Licence</h2>
     <p class="lead">We believe making money from amateur radio goes against the community and the spirit of the
-      hobby. Ferrite is free, and its source is public: read it, learn from it, build on it for your own radios, and
-      share what you make. What it isn't for is taking and selling.</p>
-    <p class="lead">We do love donations, though. They go back into the project: growing it, and more kit to hack on
+      hobby. So Ferrite is free, its source is public, and it is licensed under the
+      <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">PolyForm Noncommercial License 1.0.0</a>.
+      In plain words:</p>
+    <ul class="terms">
+      <li><b>Yours to use.</b> Put it on your own radios, read the code, change it, and share your changes. The
+        licence names hobby projects and amateur pursuits outright.</li>
+      <li><b>Free for clubs and good causes.</b> Radio clubs, schools, emergency and public-safety groups, charities
+        and government can use it too.</li>
+      <li><b>Not for sale.</b> Selling Ferrite, shipping it on radios for sale, or selling a service built on it
+        needs a commercial licence from us.</li>
+    </ul>
+    <p class="note">This is a summary; the licence text is what counts. It is source-available rather than "open
+      source" in the strict sense, because it rules out commercial use.</p>
+  </section>
+
+  <section class="support" id="support">
+    <h2><span>05</span>Donations</h2>
+    <p class="lead">We do love donations. They go back into the project: growing it, and more kit to hack on
       and share what we learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own
       radio and telling us what you find helps just as much.</p>
     <a class="btn" id="support-link" href="#" hidden>Donate</a>
   </section>
 
   <section class="support">
-    <h2><span>05</span>Radio manufacturers</h2>
+    <h2><span>06</span>Radio manufacturers</h2>
     <p class="lead">We would be glad to work with radio manufacturers. Hardware documentation, schematics or sample
       units would let Ferrite support more radios and do it properly, and a manufacturer who wants Ferrite on its
       radios can license it from us. Either way, Ferrite stays free for the people who own the radios.</p>
