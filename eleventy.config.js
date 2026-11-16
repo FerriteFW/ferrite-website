@@ -17,6 +17,8 @@ export default function (eleventyConfig) {
     "src/apple-touch-icon.png": "apple-touch-icon.png",
     "src/dev/flash-map.html": "dev/flash-map.html", // the SPI flash map, a page of its own (docs/tools/mkdev.py)
     "src/manual": "manual", // the user guide and its two sheets, as docs/tools/mkguide.py makes them
+    // Ferrite Pocket's share links (/s#...) open the app: Apple's app-site association, JSON with no extension
+    "src/.well-known": ".well-known",
   });
   eleventyConfig.ignores.add("src/dev/flash-map.html");
   eleventyConfig.ignores.add("src/manual/**");

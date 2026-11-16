@@ -1,0 +1,65 @@
+---
+layout: layouts/base.njk
+permalink: /s.html
+title: "Shared channels"
+description: "Channels shared from a Ferrite radio: open them in Ferrite Pocket to add them to yours."
+---
+<div class="wrap column share">
+  <header class="page-head">
+    <h1 id="share-title">Shared channels</h1>
+    <p class="lead">Someone shared channels from their Ferrite radio. Open this link on a phone with
+      <b>Ferrite Pocket</b> to add them to your radio: at free channel numbers, so nothing you have changes.</p>
+  </header>
+
+  <section class="section">
+    <p><a class="button" id="share-open" href="ferrite://share">Open in Ferrite Pocket</a></p>
+    <div id="share-list" hidden>
+      <p class="kicker" id="share-what"></p>
+      <div class="tablewrap"><table id="share-table"></table></div>
+    </div>
+    <p id="share-note" class="muted"></p>
+    <noscript><p>The channels are in the link itself, after the #: open it in Ferrite Pocket to see and add them.</p></noscript>
+  </section>
+
+  <section class="section prose">
+    <h3>What's in a share code</h3>
+    <p>Only the channels: their names, frequencies, tones, settings and any positions, and the zone's name when a
+      whole zone was shared. No callsign and no other settings. The code is in the link after the <code>#</code>,
+      so it never reaches this website: this page reads it in your browser.</p>
+  </section>
+</div>
+
+<script type="module">
+  // notes/share-codes.md (Pocket): "FS", version 1, layout 3, kind, then entries (what, length, record); raw
+  // DEFLATE, base64url. Shows the channels; the button hands the same code to Pocket.
+  const code = location.hash.slice(1);
+  const note = document.getElementById("share-note");
+  const open = document.getElementById("share-open");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const name = (b) => new TextDecoder().decode(b.slice(0, b.indexOf(0) < 0 ? b.length : b.indexOf(0))).trim();
+  async function read() {
+    if (!code) { note.textContent = "This link has no share code in it: ask for the whole link."; open.hidden = true; return; }
+    open.href = "ferrite://share#" + code;
+    const b64 = code.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (code.length % 4)) % 4);
+    const packed = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const raw = new Uint8Array(await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+    if (raw[0] !== 70 || raw[1] !== 83) throw new Error("not a share code");
+    if (raw[2] !== 1 || raw[3] !== 3) { note.textContent = "Made by a newer Ferrite: open it in an up-to-date Ferrite Pocket."; return; }
+    let zone = null;
+    const chans = [];
+    for (let i = 5; i + 2 <= raw.length; ) {
+      const what = raw[i], n = raw[i + 1], rec = raw.slice(i + 2, i + 2 + n);
+      i += 2 + n;
+      const v = new DataView(rec.buffer);
+      if (what === 3 && rec.length >= 16) zone = name(rec.slice(0, 16));
+      if (what === 2 && rec.length >= 24) chans.push({ name: name(rec.slice(8, 24)), mhz: (v.getUint32(4, true) / 1e5).toFixed(5), pos: null });
+      if (what === 7 && rec.length === 8 && chans.length) chans[chans.length - 1].pos = [v.getInt32(0, true) / 1e7, v.getInt32(4, true) / 1e7];
+    }
+    document.getElementById("share-title").textContent = zone ?? (chans.length === 1 ? chans[0].name || "A channel" : `${chans.length} channels`);
+    document.getElementById("share-what").textContent = zone !== null ? `A zone of ${chans.length} channel${chans.length === 1 ? "" : "s"}` : `${chans.length} channel${chans.length === 1 ? "" : "s"}`;
+    document.getElementById("share-table").innerHTML = `<tr><th>Name</th><th class="n">MHz</th><th>Site</th></tr>` +
+      chans.map((c) => `<tr><td>${esc(c.name || "(no name)")}</td><td class="n">${c.mhz}</td><td>${c.pos ? `<a href="https://maps.apple.com/?ll=${c.pos[0].toFixed(5)},${c.pos[1].toFixed(5)}&q=${encodeURIComponent(c.name)}">map</a>` : ""}</td></tr>`).join("");
+    document.getElementById("share-list").hidden = false;
+  }
+  read().catch(() => { note.textContent = "This share code didn't read: ask for the whole link again."; });
+</script>
