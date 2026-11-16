@@ -39,6 +39,7 @@ const WISH = [
   { item: "Step attenuators", low: null, high: null, why: "Weak-signal tests at known levels." },
   { item: "Rigol RSA804 spectrum analyser", low: 2500, high: 2500, why: "Harmonics and spurious emissions on transmit." },
   { item: "iPad mini (A17 Pro, 128 GB)", low: 700, high: 700, why: "Ferrite Console as an iPad app, over Bluetooth: testing it on a real tablet." },
+  { item: "Google Pixel 10a (128 GB)", low: 599, high: 599, why: "Ferrite Pocket on Android: its Bluetooth link, maps and notifications tested on a real phone against the radios (the emulator has no Bluetooth)." },
 ];
 
 const GROUPS = { radios: "Radios", test: "Test equipment", cables: "Cables and connectors" };
