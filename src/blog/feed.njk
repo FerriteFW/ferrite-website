@@ -1,0 +1,25 @@
+---
+permalink: /blog/feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-CA">
+  <title>Ferrite blog</title>
+  <subtitle>News from Ferrite, free firmware for the Radtel RT-950 Pro.</subtitle>
+  <link href="{{ site.absolute.blog }}/feed.xml" rel="self"/>
+  <link href="{{ site.absolute.blog }}/"/>
+  <updated>{% if collections.posts.length %}{{ collections.posts | getNewestCollectionItemDate | dateToRfc3339 }}{% else %}2026-10-29T00:00:00Z{% endif %}</updated>
+  <id>{{ site.absolute.blog }}/</id>
+  <author><name>{{ site.licence.holder }}</name></author>
+  {%- asyncEach post in collections.posts.slice(0, 20) %}
+  {%- set url = post.url | blogAbs %}
+  <entry>
+    <title>{{ post.data.title }}</title>
+    <link href="{{ url }}"/>
+    <updated>{{ post.date | dateToRfc3339 }}</updated>
+    <id>{{ url }}</id>
+    {% if post.data.summary %}<summary>{{ post.data.summary }}</summary>{% endif %}
+    <content type="html">{{ post.content | htmlToAbsoluteUrls(url) }}</content>
+  </entry>
+  {%- endeach %}
+</feed>

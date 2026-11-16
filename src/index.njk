@@ -1,0 +1,107 @@
+---
+layout: layouts/base.njk
+title: "Ferrite"
+description: "Ferrite is new firmware for the Radtel RT-950 Pro, written from scratch. Free, with its source public."
+---
+<section class="hero">
+  <div class="wrap hero-row">
+    <div class="hero-copy">
+      <h1>Ferrite</h1>
+      <p class="lead">New firmware for the <a href="{{ site.radio }}" rel="sponsored">Radtel RT-950 Pro</a>
+        (affiliate link), written from scratch. Three slots that watch at once, transmit on your region's amateur
+        bands, APRS decoded on the radio itself, GPS, broadcast FM and shortwave, and a battery that lasts.</p>
+      <p class="sub">Free, with its source public. In development, and already in daily use.</p>
+      <p class="status-line">Coming soon</p>
+      <div class="actions">
+        <a class="btn solid" href="/features/">See what it does</a>
+        <a class="btn" href="/try/">Try it in your browser</a>
+      </div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="screen big">
+        <div class="glow">
+          <img class="slide s1" src="/img/home.webp" alt="" width="288" height="384">
+          <img class="slide s2" src="/img/xb-passing.webp" alt="" width="288" height="384">
+          <img class="slide s3" src="/img/scope.webp" alt="" width="288" height="384">
+          <img class="slide s4" src="/img/aprsmode-card-big.webp" alt="" width="288" height="384">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="kicker"><span>01</span>What it does</p>
+    <h2>A radio that stays out of your way</h2>
+    <p class="lead" style="margin-top:14px">One fixed key layout, the things you change most one press away, and the
+      screen always telling you what the keys do next.</p>
+    <div class="grid" style="margin-top:32px">
+      <div class="card">
+        <h3>Three slots, all listening</h3>
+        <p>Slots A, B and C each hold a VFO or a channel. Watch listens to two or three of them while you talk on
+          the one in front.</p>
+      </div>
+      <div class="card">
+        <h3>Transmit</h3>
+        <p>FM voice on your region's amateur bands, with repeaters, tones, a tone search and a crossband
+          repeater. If the radio won't transmit, it says why.</p>
+      </div>
+      <div class="card">
+        <h3>APRS on the radio</h3>
+        <p>Messages, beacons, stations heard with distance and direction, and a KISS TNC over the cable or
+          Bluetooth. Slot C decodes it in the background.</p>
+      </div>
+      <div class="card">
+        <h3>Broadcast and shortwave</h3>
+        <p>FM broadcast on any slot, with station text, while the others keep watching. HF mode for shortwave and
+          AM.</p>
+      </div>
+      <div class="card">
+        <h3>GPS and waypoints</h3>
+        <p>Position, grid square, satellites, and waypoints with a dial that points the way. The GPS runs only
+          while something needs it.</p>
+      </div>
+      <div class="card">
+        <h3>Battery life</h3>
+        <p>The processor slows down while the radio waits, and Low Power Mode keeps only what you need to talk on
+          one frequency.</p>
+      </div>
+    </div>
+    <p style="margin-top:24px"><a href="/features/">Every feature, in more detail</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="kicker"><span>02</span>Measured</p>
+    <h2>Numbers from the bench</h2>
+    <p class="lead" style="margin-top:14px">Each one measured on our own radios and test audio, with the method
+      written down.</p>
+    <div class="figures">
+      <div class="figure"><b>18.6 mA</b><span>at rest, against 64.7 mA with the processor at full speed all the time</span></div>
+      <div class="figure"><b>41 % less</b><span>current in typical use with Low Power Mode on: about 23 hours becomes 39 on the stock pack</span></div>
+      <div class="figure"><b>More packets</b><span>than Dire Wolf at its default settings, on every APRS test recording we have</span></div>
+      <div class="figure"><b>Within 4 %</b><span>of stock transmit power, at every level on 2 m and 70 cm</span></div>
+    </div>
+    <p style="margin-top:24px"><a href="/features/#measured">How these were measured</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="kicker"><span>03</span>Where it's at</p>
+    <h2>The first release is on its way</h2>
+    <div class="prose" style="margin-top:14px">
+      <p>Ferrite runs every day on our own radios. The first public release, {{ site.release.next }}, isn't out
+        yet. When it is, you install it from your browser with Ferrite Console, which backs your whole radio up
+        first and can put the original firmware back.</p>
+      <p>Until then, <a href="/try/">try the simulator</a>: it runs the firmware's own screen code in your
+        browser. Questions are welcome on the <a href="{{ site.discord }}">Ferrite Discord</a>.</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/download/">How installing works</a>
+      <a class="btn" href="/bench/">Bench &amp; support</a>
+    </div>
+  </div>
+</section>

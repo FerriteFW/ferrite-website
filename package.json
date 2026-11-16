@@ -1,0 +1,17 @@
+{
+  "name": "ferrite-website",
+  "private": true,
+  "type": "module",
+  "description": "ferritefw.dev and blog.ferritefw.dev, built with Eleventy",
+  "scripts": {
+    "build": "rm -rf _site dist && ELEVENTY_ENV=production eleventy && node scripts/split.mjs",
+    "build:preview": "rm -rf _preview && eleventy --output=_preview",
+    "serve": "rm -rf _preview && eleventy --serve --output=_preview",
+    "start": "npm run serve",
+    "sim": "node scripts/copy-sim.mjs"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.7",
+    "@11ty/eleventy-plugin-rss": "^3.1.0"
+  }
+}

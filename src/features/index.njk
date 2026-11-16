@@ -1,0 +1,217 @@
+---
+layout: layouts/base.njk
+title: "Features"
+description: "What Ferrite does on the Radtel RT-950 Pro today, and the measurements behind it."
+---
+{%- macro shot(name, alt) -%}
+<figure class="screen"><img src="/img/guide/{{ name }}.webp" alt="{{ alt }}" width="240" height="320"></figure>
+{%- endmacro -%}
+<div class="wrap">
+  <header class="page-head">
+    <h1>Features</h1>
+    <p class="lead">What Ferrite does on the RT-950 Pro today. Every screen here is the firmware's own, drawn by
+      the simulator from the same code that runs on the radio.</p>
+  </header>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Everyday</p>
+      <h2>Three slots, and watch</h2>
+      <p>The radio has three slots, A, B and C. Each one is on a VFO or a channel. The active slot is the big one;
+        the other two are cards, and the radio keeps listening to them too.</p>
+      <ul>
+        <li><b>Watch</b> listens to two or three slots. The active slot is heard first; the radio never changes it
+          by itself.</li>
+        <li><b>PTT A</b> transmits on the active slot, <b>PTT B</b> always on slot B.</li>
+        <li><b>Mute or turn off</b> a busy slot with <kbd>*</kbd>, without losing it.</li>
+        <li><b>Scan</b> a zone or a band while you listen on another slot.</li>
+        <li><b>Channels in zones</b>, like folders: "Repeaters", "Air", the weather channels. A Nearby list with a
+          GPS fix.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/home.webp" alt="The home screen: slot A on a VFO, B on a repeater, C scanning airband" width="240" height="320"></figure>{{ shot("02-mute-off", "Slot A muted, slot B turned off") }}</div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">Keys</p>
+      <h2>One key layout, learned once</h2>
+      <p>The keys do the same thing on every screen and in every mode. The bar at the bottom always shows what
+        they do next.</p>
+      <ul>
+        <li><b>Quick settings:</b> <kbd>MENU</kbd>, then a digit: squelch, power, mode, tones, offset, step, watch,
+          save, Battery Save.</li>
+        <li><b>Hold a digit</b> for a shortcut: the band scope, power, the tone picker, shift.</li>
+        <li><b>Edit a slot in place:</b> hold <kbd>SLOT</kbd>, and every setting is on one screen.</li>
+        <li><b>The full menu</b> in nine groups, with number paths you can learn: <kbd>MENU</kbd> <kbd>0</kbd>
+          <kbd>5</kbd> <kbd>2</kbd> is always APRS messages.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("01-quick-settings", "Quick settings for the active slot") }}{{ shot("01-edit-slot", "Editing a slot in place") }}</div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Transmit</p>
+      <h2>Talk, and repeaters</h2>
+      <p>FM voice on your region's amateur bands: 2 m, 70 cm, 6 m, 1.25 m where it is allowed, and 17 m to 10 m.
+        You pick the region in setup.</p>
+      <ul>
+        <li><b>The Transmit screen</b> shows the frequency, power, your mic level and the time left. If the radio
+          won't transmit, it says why and which setting fixes it.</li>
+        <li><b>Add a repeater</b> in a few presses: the shift fills in from the band plan.</li>
+        <li><b>Tones</b> (CTCSS and DCS), a <b>tone search</b> for an unknown one, and the 1750 Hz burst.</li>
+        <li><b>Crossband repeater</b> between a VHF and a UHF slot.</li>
+        <li>VOX, mic gain, DTMF, CW ID, busy lockout and a transmit timeout.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("03-transmit", "The Transmit screen with mic level and timeout") }}{{ shot("03-crossband", "The crossband repeater page") }}</div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">APRS</p>
+      <h2>APRS, on the radio itself</h2>
+      <p>APRS mode gives slot C to APRS and decodes it in the background, while A and B stay free for voice.</p>
+      <ul>
+        <li><b>Messages</b> with predictive text and quick replies, retried up to 5 times until acknowledged.</li>
+        <li><b>Stations heard</b>, with distance, direction and route. Save one as a waypoint.</li>
+        <li><b>Beacons</b> by hand, on a timer, or Smart (following your speed), and a list of which digipeaters
+          repeated yours.</li>
+        <li><b>KISS TNC</b> over the cable or Bluetooth, for apps on your computer or phone.</li>
+        <li>FX.25 error correction, digipeating, Mic-E and telemetry.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("05-aprs-card", "The APRS slot on the home screen") }}{{ shot("05-heard", "Stations heard, with distance and direction") }}</div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Listen</p>
+      <h2>Broadcast FM, shortwave and weather</h2>
+      <p>A third receiver chip handles broadcast FM, AM and shortwave on its own.</p>
+      <ul>
+        <li><b>FM broadcast on any slot</b>, with stereo and station text (RDS). Your other slots keep watching;
+          the music goes quiet when one of them receives.</li>
+        <li><b>HF mode</b> for shortwave and the HF amateur bands: AM everywhere, FM from 18 MHz.</li>
+        <li><b>The band scope</b> shows activity around your frequency at a glance.</li>
+        <li><b>Weather radio</b> for the US and Canada, with SAME alerts for your area.</li>
+        <li><b>DTMF digits</b> heard show on the slot's card.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("06-fm", "FM broadcast") }}{{ shot("06-hf", "HF mode on 31 m") }}</div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">GPS and Bluetooth</p>
+      <h2>Where you are, and a link to your computer</h2>
+      <ul>
+        <li><b>GPS</b>: position, grid square, altitude, speed and a sky plot. On Auto, it runs only while
+          something needs your position.</li>
+        <li><b>Waypoints</b> with a dial that turns as you move, and an arrival alarm.</li>
+        <li><b>The clock</b> sets itself from the GPS.</li>
+        <li><b>Bluetooth</b> for Ferrite Console or an APRS app, with an optional PIN.</li>
+        <li><b>Ferrite Console</b> in Chrome or Edge: a live view of the screen, channels with CHIRP CSV import,
+          settings, APRS messages and a map, listening on the computer, and updates.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("07-gps", "GPS position, grid square and nearest waypoint") }}{{ shot("07-waypoints", "Waypoints, nearest first") }}</div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Power</p>
+      <h2>A battery that lasts</h2>
+      <ul>
+        <li><b>Dynamic clocking:</b> the processor runs at 24 MHz while the radio waits, and at full speed only
+          while something needs it. Nothing to set.</li>
+        <li><b>Battery Save</b> lets the receivers sleep between short checks, at three depths.</li>
+        <li><b>Low Power Mode</b> keeps only what you need to talk on one frequency. On Auto, it comes on by
+          itself below 20 %. Tuning, the menus and editing still work.</li>
+        <li><b>Night red</b> two presses away, and a high-contrast daylight theme for the sun.</li>
+      </ul>
+    </div>
+    <div class="shots">{{ shot("08-low-power", "Low Power Mode, one slot in an amber frame") }}{{ shot("08-night-red", "The night red theme") }}</div>
+  </section>
+
+  <section class="section" id="why">
+    <div class="prose">
+      <p class="kicker">Why change firmware</p>
+      <h2>Why Ferrite instead of stock</h2>
+      <p>The RT-950 Pro is good hardware. Ferrite is a different idea of how to use it: one fixed key layout, three
+        slots that listen at once, APRS and the decoders on the radio itself, and a lot of attention to battery
+        life. Some things it keeps exactly as they were:</p>
+      <ul>
+        <li><b>Your calibration</b> is used as it is and never erased.</li>
+        <li><b>The radio's own bootloader</b> installs every image and is never changed, so an update can always be
+          tried again.</li>
+        <li><b>Transmit power</b> matches stock: within 4 % at every level we measured.</li>
+        <li><b>Going back</b> is built into Ferrite Console: it writes your old channels and settings back, then
+          the original firmware.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="measured">
+    <div class="prose">
+      <p class="kicker">Measured</p>
+      <h2>The numbers, and how we got them</h2>
+
+      <h3>Resting current: dynamic clocking</h3>
+      <p>One radio on the bench supply at 7.6 V, 15 minutes a run, squelch closed on a quiet channel, screen off,
+        GPS and Bluetooth off, Battery Save on.</p>
+    </div>
+    <div class="tablewrap prose">
+      <table>
+        <tr><th>Processor</th><th>Watch</th><th class="n">Current</th><th class="n">2000 mAh pack</th></tr>
+        <tr><td>Full speed always</td><td>Off</td><td class="n">64.7 mA</td><td class="n">31 h</td></tr>
+        <tr><td>Full speed always</td><td>A+B</td><td class="n">64.2 mA</td><td class="n">31 h</td></tr>
+        <tr><td class="em">Dynamic</td><td>Off</td><td class="n em">18.6 mA</td><td class="n em">107 h</td></tr>
+        <tr><td class="em">Dynamic</td><td>A+B</td><td class="n em">18.7 mA</td><td class="n em">107 h</td></tr>
+      </table>
+    </div>
+    <div class="prose">
+      <p>These are resting numbers, the best case: keys, scanning and APRS bring full speed for as long as they
+        run. APRS mode keeps the processor at full speed, so most of this saving doesn't apply while it is on.
+        Low Power Mode on top cut current by 41 % in typical use: about 23 hours on the stock pack became 39.</p>
+
+      <h3>APRS decoder</h3>
+      <p>Ferrite decodes APRS on the radio's own processor. We ran it side by side with Dire Wolf on the same audio:
+        frames with a correct checksum, Dire Wolf 1.8.1 at its default settings.</p>
+    </div>
+    <div class="tablewrap prose">
+      <table>
+        <tr><th>Test audio</th><th class="n">Dire Wolf</th><th class="n">Ferrite</th></tr>
+        <tr><td>WA8LMF TNC Test CD, track 1</td><td class="n">1,005</td><td class="n em">1,007</td></tr>
+        <tr><td>WA8LMF TNC Test CD, track 2</td><td class="n">982</td><td class="n em">1,009</td></tr>
+        <tr><td>Off-air recording 1, 45 min</td><td class="n">353</td><td class="n em">406</td></tr>
+        <tr><td>Off-air recording 2, 25 min</td><td class="n">367</td><td class="n em">389</td></tr>
+      </table>
+    </div>
+    <div class="prose">
+      <p>Every packet Ferrite reported was checked again with a separate checksum routine: none were wrong. Dire
+        Wolf can do better than its defaults: with bit fixing on, it decodes more than Ferrite on all four. Against
+        the published WA8LMF results, Ferrite is in the top group, a little behind UZ7HO's
+        SoundModem and the Mobilinkd TNC3.</p>
+
+      <h3>Transmit power</h3>
+      <p>Stock firmware and Ferrite on the same radio, inline power meter, stock antenna, in watts.</p>
+    </div>
+    <div class="tablewrap prose">
+      <table>
+        <tr><th>Band</th><th>Level</th><th class="n">Stock</th><th class="n">Ferrite</th></tr>
+        <tr><td>2 m</td><td>Low</td><td class="n">0.38 to 0.46</td><td class="n">0.46</td></tr>
+        <tr><td>2 m</td><td>Mid</td><td class="n">2.36</td><td class="n">2.46</td></tr>
+        <tr><td>2 m</td><td>High</td><td class="n">9.08</td><td class="n">9.01</td></tr>
+        <tr><td>70 cm</td><td>Low</td><td class="n">0.95</td><td class="n">0.98</td></tr>
+        <tr><td>70 cm</td><td>Mid</td><td class="n">4.73</td><td class="n">4.89</td></tr>
+        <tr><td>70 cm</td><td>High</td><td class="n">9.93</td><td class="n">9.81</td></tr>
+      </table>
+    </div>
+    <div class="prose">
+      <p class="note">Measured October 2026 on our own radios.</p>
+      <p>The full how-to for every feature is in the <a href="{{ site.urls.manual }}">user guide</a>.</p>
+    </div>
+  </section>
+</div>

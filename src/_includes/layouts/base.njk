@@ -1,0 +1,67 @@
+{%- set isBlog = page.url.startsWith("/blog") -%}
+{%- set nav = [
+  { label: "Features", href: "/features/" | wwwUrl, key: "/features/" },
+  { label: "Download", href: "/download/" | wwwUrl, key: "/download/" },
+  { label: "Try it", href: "/try/" | wwwUrl, key: "/try/" },
+  { label: "Manual", href: site.urls.manual, key: "manual" },
+  { label: "Console", href: site.urls.console, key: "console" },
+  { label: "Blog", href: site.urls.blog + "/", key: "/blog/" }
+] -%}
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if title and page.url != "/" %}{{ title }} · Ferrite{% else %}Ferrite: firmware for the Radtel RT-950 Pro{% endif %}</title>
+<meta name="description" content="{{ description or summary or site.description }}">
+<meta name="theme-color" content="#07080a">
+<meta property="og:title" content="{{ title or 'Ferrite' }}">
+<meta property="og:description" content="{{ description or summary or site.description }}">
+<meta property="og:type" content="{% if isBlog and page.url != '/blog/' %}article{% else %}website{% endif %}">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="alternate" type="application/atom+xml" title="Ferrite blog" href="{{ site.urls.blog }}/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body class="{{ bodyClass or '' }}">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="{{ '/' | wwwUrl }}">{% include "logo.njk" %}<span>Ferrite</span></a>
+    <nav aria-label="Main">
+      <ul>
+        {%- for item in nav %}
+        {%- set here = (item.key == "/blog/" and isBlog) or (item.key != "/blog/" and page.url.startsWith(item.key)) %}
+        <li><a href="{{ item.href }}"{% if here %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+        {%- endfor %}
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{{ content | safe }}
+</main>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div>
+      <a class="brand brand-small" href="{{ '/' | wwwUrl }}">{% include "logo.njk" %}<span>Ferrite</span></a>
+      <p>Free firmware for the Radtel RT-950 Pro, with its source public. Licensed under the
+        <a href="{{ site.licence.url }}">{{ site.licence.name }}</a>. Copyright 2026 {{ site.licence.holder }}.</p>
+    </div>
+    <ul class="foot-links">
+      <li><a href="{{ site.discord }}">Discord</a>: help and questions</li>
+      <li><a href="{{ '/bench/' | wwwUrl }}">Bench &amp; support</a></li>
+      <li><a href="{{ site.urls.blog }}/feed.xml">Blog feed</a></li>
+      <li><a href="{{ site.radio }}" rel="sponsored">Radtel RT-950 Pro</a> (affiliate link)</li>
+    </ul>
+  </div>
+  <div class="wrap fine"><p>An independent project, not made by or affiliated with Radtel. The radio link is an affiliate
+    link: buying through it supports Ferrite, at no extra cost to you. ·
+    <span class="ca"><svg viewBox="0 0 9600 4800" width="18" height="9" role="img" aria-label="Canadian flag" fill="currentColor"><path d="M0 0h2400v4800H0zM7200 0h2400v4800H7200z"/><path d="M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg> Made in Canada</span></p></div>
+</footer>
+</body>
+</html>

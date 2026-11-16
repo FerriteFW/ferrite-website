@@ -1,0 +1,75 @@
+---
+layout: layouts/base.njk
+title: "Download & install"
+description: "How Ferrite is installed on the Radtel RT-950 Pro, how to check a release's signature, and where the first release stands."
+---
+<div class="wrap">
+  <header class="page-head">
+    <h1>Download &amp; install</h1>
+    <p class="lead">Ferrite goes on the radio from your browser, through the radio's own bootloader. Here is how
+      that works, and how to check that a release really comes from us.</p>
+  </header>
+
+  {% if not site.release.released %}
+  <div class="callout">
+    <p><b>The first public release, {{ site.release.next }}, isn't out yet.</b> There is nothing to download
+      today. When it is ready, it will be here and in Ferrite Console, and we'll say so on the
+      <a href="{{ site.urls.blog }}/">blog</a> and the <a href="{{ site.discord }}">Discord</a>.</p>
+    <p>In the meantime, you can <a href="/try/">try the simulator</a> in your browser.</p>
+  </div>
+  {% endif %}
+
+  <section class="section">
+    <div class="prose">
+      <h2>What you need</h2>
+      <ul>
+        <li>A Radtel RT-950 Pro and its programming cable.</li>
+        <li>A computer with Chrome or Edge, for <a href="{{ site.urls.console }}">Ferrite Console</a>. Safari and
+          Firefox can't reach the cable.</li>
+        <li>The original firmware file from Radtel (the <code>.BTF</code>). You need it to go back, and the HF
+          receiver's SSB support comes from it.</li>
+      </ul>
+
+      <h2>How installing works</h2>
+      <p>Everything happens on Console's <b>Install</b> page, over the USB cable.</p>
+      <ol class="steps">
+        <li><b>Connect.</b> Plug in the cable and turn the radio on. Any firmware is fine.</li>
+        <li><b>Back up the whole radio.</b> It takes about a minute and a half. Console won't install until the
+          backup is done and you have saved the file. Keep it safe, off the computer too.</li>
+        <li><b>SSB, optional.</b> Drop in your Radtel <code>.BTF</code>: Console takes the SSB support from it,
+          on your computer.</li>
+        <li><b>Install.</b> About a minute. The radio restarts, Ferrite sets up its storage, and setup asks a few
+          questions: callsign, region, time, look.</li>
+      </ol>
+      <p>Your calibration is never erased. Installing replaces the radio's channels and settings, so you add your
+        channels again after; Console can import a CHIRP CSV.</p>
+
+      <h2>Going back to stock</h2>
+      <p>Going back is built into the same page. Console checks the backup is this radio's own, writes your old
+        channels and settings back, then installs the original firmware. The radio restarts as it was before
+        Ferrite.</p>
+      <p>The bootloader is the radio's own and is never changed, so an install or an update can always be tried
+        again.</p>
+
+      <h2 id="verify">Checking a release</h2>
+      <p>Every release image comes with a <a href="https://jedisct1.github.io/minisign/">minisign</a> signature, a
+        <code>.minisig</code> file beside it. Ferrite Console checks it before installing. To check one yourself,
+        install minisign and run:</p>
+    </div>
+    <pre class="prose wrapcode"><code>minisign -Vm ferrite-{{ site.release.next }}.btf -P {{ site.minisign.key }}</code></pre>
+    <div class="prose">
+      <p>It prints "Signature and comment signature verified" for a good file. Anything else, don't install it.</p>
+      <p>Ferrite's public key:</p>
+    </div>
+    <div class="keybox prose"><small>Key ID {{ site.minisign.id }}</small>{{ site.minisign.key }}</div>
+    <div class="prose" style="margin-top:24px">
+      <p class="note">Your own builds aren't signed; Console installs them and says so.</p>
+
+      <h2>Updating</h2>
+      <p>On a radio already on Ferrite, Console's <b>Firmware Update</b> checks the file, restarts the radio into
+        its bootloader and sends the update. Your channels, settings and SSB support stay.</p>
+      <p>Step by step, with what to do if the radio doesn't answer: the
+        <a href="{{ site.urls.manual }}">user guide</a>.</p>
+    </div>
+  </section>
+</div>

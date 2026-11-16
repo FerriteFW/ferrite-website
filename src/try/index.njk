@@ -1,0 +1,43 @@
+---
+layout: layouts/base.njk
+title: "Try it"
+description: "The Ferrite simulator: the firmware's own screen code, running on a pretend radio in your browser."
+---
+<div class="wrap">
+  <header class="page-head">
+    <h1>Try it</h1>
+    <p class="lead">The simulator runs Ferrite's own screen code in your browser, on a pretend radio with three
+      slots and a few sample channels. Press the keys, turn the knob, and see how it feels before you install
+      anything.</p>
+    <div class="actions">
+      <a class="btn solid" href="/try/sim/">Open the simulator</a>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="feature" style="padding:0">
+      <div class="prose">
+        <h2>Things to try</h2>
+        <ul>
+          <li><kbd>MENU</kbd> on home opens quick settings; hold it for the full menu.</li>
+          <li><kbd>SLOT</kbd> moves between slots A, B and C. Hold it to edit the slot in place.</li>
+          <li>On a VFO, type a frequency on the digits: <kbd>1</kbd><kbd>4</kbd><kbd>6</kbd><kbd>5</kbd><kbd>2</kbd><kbd>0</kbd>.</li>
+          <li>Hold <kbd>1</kbd> for the band scope, or hold <kbd>4</kbd> to turn watch on or off.</li>
+          <li><kbd>MENU</kbd> <kbd>0</kbd> <kbd>5</kbd> <kbd>3</kbd>, then the knob, turns APRS mode on.</li>
+          <li>Hold <kbd>BACK</kbd> to go home from anywhere.</li>
+        </ul>
+        <h2>On a computer</h2>
+        <p>Click the radio first so it has the keyboard. <kbd>Enter</kbd> is MENU/OK, <kbd>Esc</kbd> is BACK, the
+          arrows are the arrows, <kbd>[</kbd> <kbd>]</kbd> or the mouse wheel turn the knob, and <kbd>S</kbd> is
+          SLOT. The simulator page lists every key.</p>
+        <p>The simulator keeps its settings and channels in your browser, as the radio keeps them in flash, so your
+          changes are still there next time.</p>
+        <p class="note">The radio part is pretend: nothing is received or sent, and the signals you see are made
+          up.</p>
+      </div>
+      <div class="shots">
+        <figure class="screen"><img src="/img/home.webp" alt="The home screen with three slots" width="240" height="320"></figure>
+      </div>
+    </div>
+  </section>
+</div>

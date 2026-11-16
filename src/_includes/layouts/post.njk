@@ -1,0 +1,13 @@
+---
+layout: layouts/base.njk
+---
+<article class="wrap post">
+  <p class="meta"><a href="{{ site.urls.blog }}/">Blog</a> · <time datetime="{{ page.date | isoDate }}">{{ page.date | readableDate }}</time>{% if draft %}<span class="draft">Draft</span>{% endif %}</p>
+  <h1>{{ title }}</h1>
+  {% if summary %}<p class="lead" style="margin-top:16px">{{ summary }}</p>{% endif %}
+  <div class="prose">
+{{ content | safe }}
+  </div>
+  <p class="post-foot">Questions or comments: the <a href="{{ site.discord }}">Ferrite Discord</a>. New posts by
+    <a href="{{ site.urls.blog }}/feed.xml">feed</a>.</p>
+</article>
