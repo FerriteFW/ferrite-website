@@ -24,7 +24,8 @@ Posts we want to write, roughly in no order. A post starts as a `draft: true` fi
   rest and back up only while there's work, what it took (the watch's hops stay at 24 MHz, the clock tree, what
   has to stay fast), and the bench numbers: 18.6 mA against 64.7 mA at rest, about 107 hours on the stock pack,
   measured with the supply's own charge tally. Sources: `docs/showcase/dynamic-clocking.md`,
-  `docs/manual/33-power-battery.md` (PWR-26), decisions 250-253.
+  `docs/manual/33-power-battery.md` (PWR-26), decisions 250-253, and the power page with its measured current and
+  battery life (`docs/dev/power.html`, made by `docs/tools/mkpower.py`; Alex, Nov 3: kept for this post).
 - **How we built and tested the APRS decoder.** Our own AFSK modem in about 1.7 KB of RAM on the radio's
   processor: three slicers, soft repair of the least certain bits, FX.25; scored on off-air recordings and the
   WA8LMF test CD against Dire Wolf and published results, every change re-run on the recordings. Top tier, inside
