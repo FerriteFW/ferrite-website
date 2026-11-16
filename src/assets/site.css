@@ -247,3 +247,17 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 .tile-title { display: block; margin-bottom: 4px; font-size: 15px; color: var(--text); }
 .tile-len { color: var(--dim); }
 .nowrap { white-space: nowrap; }
+
+/* Reading pages: one centred column, the page head with it. */
+.wrap.column { max-width: calc(var(--measure) + 2 * var(--gutter)); }
+.column .prose, .column .lead, .column .callout, .column .post-list, .column .post-foot { max-width: none; }
+.column-in { max-width: var(--measure); margin-inline: auto; }
+.column-in .prose, .column-in .tablewrap { max-width: none; }
+/* Download: short and calm. */
+.download .page-head { padding-bottom: 20px; }
+.download .prose h3 { font-size: 19px; margin: 32px 0 8px; }
+.download .prose p, .download .prose ol { margin-bottom: 0.6em; }
+.download .steps > li + li { margin-top: 8px !important; }
+.download .keybox { margin: 12px 0 10px; }
+.download pre { margin-bottom: 0; }
+.column .prose h3 { font-size: 19px; margin: 32px 0 8px; }

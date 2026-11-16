@@ -1,9 +1,9 @@
 ---
 layout: layouts/base.njk
 title: "Bench & support the project"
-description: "The gear Ferrite is developed and tested with, what it has cost, the licence in plain words, and how to help."
+description: "The gear Ferrite is developed and tested with, what it has cost, and how to help."
 ---
-<div class="wrap">
+<div class="wrap column bench">
   <header class="page-head">
     <h1>The bench</h1>
     <p class="lead">Ferrite is built by a small group: developers, testers running it on their own radios, and, we
@@ -47,25 +47,9 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
     </div>
   </section>
 
-  <section class="section prose" id="licence">
-    <p class="kicker"><span>03</span>Licence</p>
-    <p>We believe making money from amateur radio goes against the community and the spirit of the hobby. So
-      Ferrite is free, its source is public, and it is licensed under the
-      <a href="{{ site.licence.url }}">{{ site.licence.name }}</a>. In plain words:</p>
-    <ul>
-      <li><b>Free, for everyone.</b> Put it on your radios, read the code, change it, and share your changes: you,
-        your club, your school, your emergency group. The licence names hobby projects and amateur pursuits
-        outright.</li>
-      <li><b>Not for sale.</b> Selling Ferrite, shipping it on radios for sale, or selling a service built on it
-        needs a commercial licence from us.</li>
-    </ul>
-    <p class="note">This is a summary; the licence text is what counts. It is source-available rather than "open
-      source" in the strict sense, because it rules out commercial use.</p>
-  </section>
-
   {% if site.SUPPORT_URL %}
   <section class="section prose" id="support">
-    <p class="kicker"><span>04</span>Donations</p>
+    <p class="kicker"><span>03</span>Donations</p>
     <p>We do love donations. They go back into the project: growing it, and more kit to hack on and share what we
       learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own radio and telling
       us what you find helps just as much.</p>
@@ -74,10 +58,10 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
   {% endif %}
 
   <section class="section prose" id="manufacturers">
-    <p class="kicker"><span>{% if site.SUPPORT_URL %}05{% else %}04{% endif %}</span>Radio manufacturers</p>
+    <p class="kicker"><span>{% if site.SUPPORT_URL %}04{% else %}03{% endif %}</span>Radio manufacturers</p>
     <p>We would be glad to work with radio manufacturers. Hardware documentation, schematics or sample units would
       let Ferrite support more radios and do it properly, and a manufacturer who wants Ferrite on its radios can
-      license it from us. Either way, Ferrite stays free for the people who own the radios.</p>
+      <a href="/licence/">license it from us</a>. Either way, Ferrite stays free for the people who own the radios.</p>
     <p>And we would love to help spec the next generation of hacker-friendly, open radios: the parts, the pins and
       the documentation that make a radio easy to build on, from what we've learned on this one.</p>
     {% if site.CONTACT %}<p>Get in touch: <a href="mailto:{{ site.CONTACT }}">{{ site.CONTACT }}</a></p>{% endif %}

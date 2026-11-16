@@ -41,9 +41,9 @@ export default {
   SUPPORT_URL: "", // the donation link: the Donations section shows once it is set
   CONTACT: "", // the manufacturers' contact (an email address)
 
-  // Releases. Set `released` once 0.9 is out; until then the download page says it isn't out yet.
+  // Releases. Set `released` once the first release is out; until then the download page says "Coming soon."
+  // (No version numbers on public pages.)
   release: {
-    next: "0.9",
     released: false,
   },
   minisign: {
