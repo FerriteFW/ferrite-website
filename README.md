@@ -26,7 +26,7 @@ Client JavaScript only on Home (`src/assets/home.js`, the story's loops) and Wat
 
 ## Blog posts
 
-One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md).
+One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md). Ideas for posts: [BLOG-IDEAS.md](BLOG-IDEAS.md).
 
 ## Home's story and the Watch page
 
