@@ -57,3 +57,10 @@ Posts we want to write, roughly in no order. A post starts as a `draft: true` fi
 - **Drawing a UI through a 0.24 µs-a-byte straw.** Making the screen fast on a slow panel bus and 96 KB of RAM:
   banded drawing, fast flash for the hot paths, profiling on the radio. Sources: CLAUDE.md's size-and-speed
   lessons, `ferrite_ui::prof`, the DISP rules.
+- **The Rust diet.** How a Rust firmware stays small enough for the radio: the build flags (core rebuilt at
+  opt-level z, LTO, one codegen unit, no panic messages or location strings, panics as one trap instruction,
+  identical-code folding), no `core::fmt` (ufmt instead), generics as thin shims over one shared function (the 18 KB
+  if-statement), hot code and tables pinned in the 256 KB of fast flash, and a size map diffed on every change to
+  shared code (`tools/sizemap.py`, `tools/slowcheck.py`, the build report). Today's tx image: about 712 KB, fast
+  flash 115 of 244 KB. Sources: CLAUDE.md "Size and speed", `ferrite/.cargo/config.toml`,
+  `docs/research/flash-audit-oct27.md`, `docs/archive/fw-rs-size-comparison.md`.
