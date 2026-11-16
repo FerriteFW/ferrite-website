@@ -16,7 +16,9 @@ export default {
     www: production ? "https://ferritefw.dev" : "",
     blog: production ? "https://blog.ferritefw.dev" : "/blog",
     console: "https://console.ferritefw.dev",
-    manual: "https://manual.ferritefw.dev",
+    // The user guide is part of this site (docs/tools/mkguide.py copies it into src/manual/): the radio's QR code
+    // points at ferritefw.dev/manual (HELP-2).
+    manual: production ? "https://ferritefw.dev/manual" : "/manual",
   },
   // Absolute addresses, for the feed and social tags.
   absolute: {

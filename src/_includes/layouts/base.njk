@@ -3,11 +3,11 @@
   { label: "Features", href: "/features/" | wwwUrl, key: "/features/" },
   { label: "Watch", href: "/watch/" | wwwUrl, key: "/watch/" },
   { label: "Download", href: "/download/" | wwwUrl, key: "/download/" },
+  { label: "Manual", href: "/manual/" | wwwUrl, key: "/manual/" },
   { label: "Bench", href: "/bench/" | wwwUrl, key: "/bench/" },
   { label: "Blog", href: site.urls.blog + "/", key: "/blog/" }
 ] -%}
 {%- set navOut = [
-  { label: "Manual", href: site.urls.manual },
   { label: "Console", href: site.urls.console },
   { label: "Discord", href: site.discord },
   { label: "Source", href: site.SOURCE_URL }
@@ -66,6 +66,7 @@
     <ul class="foot-links">
       <li><a href="{{ site.discord }}">Discord</a>: help and questions</li>
       <li><a href="{{ site.SOURCE_URL }}">Source</a>: the code, free and public</li>
+      <li><a href="{{ '/dev/' | wwwUrl }}">Developers</a>: building, the link protocol, file formats</li>
       <li><a href="{{ '/bench/' | wwwUrl }}">Bench &amp; support the project</a></li>
       <li><a href="{{ site.urls.blog }}/feed.xml">Blog feed</a></li>
       <li><a href="{{ site.radio }}" rel="sponsored">Radtel RT-950 Pro</a>: the radio</li>

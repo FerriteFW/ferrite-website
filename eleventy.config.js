@@ -16,8 +16,10 @@ export default function (eleventyConfig) {
     "src/favicon.svg": "favicon.svg",
     "src/apple-touch-icon.png": "apple-touch-icon.png",
     "src/dev/flash-map.html": "dev/flash-map.html", // the SPI flash map, a page of its own (docs/tools/mkdev.py)
+    "src/manual": "manual", // the user guide and its two sheets, as docs/tools/mkguide.py makes them
   });
   eleventyConfig.ignores.add("src/dev/flash-map.html");
+  eleventyConfig.ignores.add("src/manual/**");
   eleventyConfig.addWatchTarget("src/assets/");
 
   eleventyConfig.addCollection("posts", (api) =>
