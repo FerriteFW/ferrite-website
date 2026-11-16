@@ -3,7 +3,7 @@
 Posts we want to write, roughly in no order. A post starts as a `draft: true` file in `src/blog/posts/` (see
 `POSTING.md`). How posts read: BLOG-STYLE.md.
 
-- **Why Ferrite is written in Rust.** Drafted: `src/blog/posts/2026-11-01-why-rust.md`. The launch post.
+- **Why Ferrite is Rust(ing).** Drafted: `src/blog/posts/2026-11-01-why-rust.md`. The launch post.
 - **Why we test everything, and why we chase coverage.** The Rust post points ahead to this one. The numbers:
   3,924 host tests and about 97 % line coverage of the radio's code (build report, Oct 29), the 171-test simulator
   UI suite, the on-radio suites and the SDR transmit bench. Every change runs thousands of host tests, the full
