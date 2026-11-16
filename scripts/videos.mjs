@@ -19,6 +19,7 @@ const promo = join(resolve(process.env.FERRITE_DIR || join(here, "..", "..", "fe
 const out = join(here, "..", "src", "video");
 // site name -> source file, and the poster's time in seconds (a frame with a screen on it, not a title card).
 const VIDEOS = {
+  launch: { src: "launch.mp4", poster: 13 }, // the band scope
   tour: { src: "preview.mp4", poster: 19 }, // the band scope
   unique: { src: "unique.mp4", poster: 14 }, // APRS that isn't missed
   aprs: { src: "aprs.mp4", poster: 24 }, // the APRS card

@@ -16,12 +16,20 @@ description: "How Ferrite is installed on the Radtel RT-950 Pro (and radios buil
   {% endif %}
 
   <div class="prose">
+    <h3>Get Ferrite Console</h3>
+    <p>Ferrite Console installs Ferrite, backs up the radio and edits its channels. Ferrite comes inside it, and the
+      app keeps itself and Ferrite up to date.</p>
+    <ul class="steps">
+      <li><a href="{{ site.consoleReleases }}"><b>macOS</b></a>: the <code>.dmg</code> (Apple silicon).</li>
+      <li><a href="{{ site.consoleReleases }}"><b>Linux</b></a>: the <code>.AppImage</code>.</li>
+      <li><a href="{{ site.consoleReleases }}"><b>Windows</b></a>: the portable <code>.exe</code>, nothing to install.</li>
+    </ul>
+
     <h3>What you need</h3>
-    <p>A Radtel RT-950 Pro, or a radio built on the same hardware, its programming cable, and Chrome, Edge or
-      Firefox on a computer. Keep the stock firmware file (the <code>.BTF</code>): it's your way back.</p>
+    <p>A Radtel RT-950 Pro, or a radio built on the same hardware, and its programming cable. Keep the stock firmware
+      file (the <code>.BTF</code>): it's your way back.</p>
 
     <h3>Installing</h3>
-    <p>In <a href="{{ site.urls.console }}">Ferrite Console</a>:</p>
     <ol class="steps">
       <li><b>Connect</b> the cable and turn the radio on.</li>
       <li><b>Back up</b> the whole radio. Console won't install until the backup is saved.</li>
@@ -37,7 +45,7 @@ description: "How Ferrite is installed on the Radtel RT-950 Pro (and radios buil
       it before installing.</p>
   </div>
   <div class="keybox"><small>Ferrite's public key · ID {{ site.minisign.id }}</small>{{ site.minisign.key }}</div>
-  <pre class="wrapcode"><code>minisign -Vm ferrite.btf -P {{ site.minisign.key }}</code></pre>
+  <pre class="wrapcode"><code>minisign -Vm SHA256SUMS -P {{ site.minisign.key }}</code></pre>
 
   <div class="prose">
     <h3>Updating</h3>

@@ -27,8 +27,9 @@ export default {
   },
 
   discord: "https://discord.gg/fYygBVD2Kx",
-  // The source, in the header and the footer. The repo is private until 0.9 ships, so for now this link 404s
-  // for visitors; it works once FerriteFW/ferrite goes public.
+  // Ferrite Console's desktop downloads: the latest GitHub release.
+  consoleReleases: "https://github.com/FerriteFW/console/releases/latest",
+  // The source, in the header and the footer (public since 0.9).
   SOURCE_URL: "https://github.com/FerriteFW/ferrite",
   // The radio, through Ferrite's Radtel affiliate link everywhere. Called an affiliate link only on the Bench &
   // support page, where buying through it is offered as a way to support the project.
@@ -53,7 +54,7 @@ export default {
   // Releases. Set `released` once the first release is out; until then the download page says "Coming soon."
   // (No version numbers on public pages.)
   release: {
-    released: false,
+    released: true,
   },
   minisign: {
     id: "5B2C47F45817851B",
