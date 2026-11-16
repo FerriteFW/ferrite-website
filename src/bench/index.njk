@@ -47,18 +47,21 @@ description: "The gear Ferrite is developed and tested with, what it has cost, a
     </div>
   </section>
 
-  {% if site.SUPPORT_URL %}
   <section class="section prose" id="support">
-    <p class="kicker"><span>03</span>Donations</p>
+    <p class="kicker"><span>03</span>Support the project</p>
+    <p>Buying an RT-950 Pro? Get it through our <a href="{{ site.radioAffiliate }}" rel="sponsored">Radtel
+      affiliate link</a>. It supports Ferrite, at no extra cost to you.</p>
+    {%- if site.SUPPORT_URL %}
     <p>We do love donations. They go back into the project: growing it, and more kit to hack on and share what we
-      learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own radio and telling
-      us what you find on the <a href="{{ site.discord }}">Discord</a> helps just as much.</p>
+      learn. If Ferrite is useful to you, please pay it forward if you can.</p>
     <a class="btn" href="{{ site.SUPPORT_URL }}">Donate</a>
+    {%- endif %}
+    <p>Testing on your own radio and telling us what you find on the <a href="{{ site.discord }}">Discord</a> helps
+      just as much.</p>
   </section>
-  {% endif %}
 
   <section class="section prose" id="manufacturers">
-    <p class="kicker"><span>{% if site.SUPPORT_URL %}04{% else %}03{% endif %}</span>Radio manufacturers</p>
+    <p class="kicker"><span>04</span>Radio manufacturers</p>
     <p>We would be glad to work with radio manufacturers. Hardware documentation, schematics or sample units would
       let Ferrite support more radios and do it properly, and a manufacturer who wants Ferrite on its radios can
       <a href="/licence/">license it from us</a>. Either way, Ferrite stays free for the people who own the radios.</p>
