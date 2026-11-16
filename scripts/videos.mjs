@@ -16,8 +16,7 @@ const out = join(here, "..", "src", "video");
 // site name -> source file, and the poster's time in seconds (a frame with a screen on it, not a title card).
 const VIDEOS = {
   tour: { src: "preview.mp4", poster: 8 },
-  // start: skip the first seconds. unique.mp4's opening card names another firmware, which the site never does.
-  unique: { src: "unique.mp4", poster: 8, start: 4 },
+  unique: { src: "unique.mp4", poster: 8 },
   aprs: { src: "aprs.mp4", poster: 8 },
   lowpower: { src: "lowpower.mp4", poster: 8 },
 };
