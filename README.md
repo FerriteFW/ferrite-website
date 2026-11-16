@@ -1,7 +1,7 @@
 # ferritefw.dev
 
 The Ferrite website and blog, built with [Eleventy 3](https://www.11ty.dev). One build makes both sites.
-No client JavaScript except the simulator page (`/try/`).
+Client JavaScript only on Home (`src/assets/home.js`, a few lines: the story's loops and the video tiles); every page works without it.
 
 ## Build and preview
 
@@ -11,7 +11,7 @@ No client JavaScript except the simulator page (`/try/`).
 
 ## Where things are
 
-- `src/` pages: `index.njk` (Home: intro and videos), `features/`, `download/`, `try/`, `bench/`, `blog/`.
+- `src/` pages: `index.njk` (Home: the story and the videos), `features/`, `download/`, `bench/`, `blog/`.
 - `src/_data/site.js`: the URL map, links, licence, the release switch and the bench page's `SUPPORT_URL` and `CONTACT` (each section stays hidden until set).
 - `src/_data/bench.js`: the bench and wish lists, in whole Canadian dollars.
 - `src/assets/site.css`: the one stylesheet.
@@ -28,18 +28,13 @@ No client JavaScript except the simulator page (`/try/`).
 
 One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md).
 
-## The simulator (Try it)
+## Home: the story and the videos
 
-- `/try/` is the site's own page: the screen (cropped from what the wasm draws), plain buttons for every key, and a short key legend. Its script is `src/assets/try.js`; it uses the wasm's API (`ferrite/sim-web/README.md`).
-- The wasm is `vendor/sim/ferrite_sim_web.wasm`, served as `/try/ferrite_sim_web.wasm`. `/try/sim/` only redirects to `/try/`.
-- To refresh it: `cargo simweb` in `ferrite/`, then `npm run sim` here, and commit the new wasm (it is under 1 MB, so the site builds without a Rust toolchain).
-- `FERRITE_DIR=/path/to/ferrite npm run sim` if the checkout isn't at `../ferrite`.
-
-## Videos (Home)
-
-- Home is a short intro and four videos: `src/video/{tour,unique,aprs,lowpower}.mp4`, each with a `.jpg` poster. Titles and lines are in `src/index.njk`'s front matter.
-- To refresh them: render with `tools/promo/mkvideo.py` in `ferrite/`, then `npm run videos` here (needs ffmpeg). It writes H.264 1280x720 (CRF 26), AAC 128k, faststart, and a poster frame. Look at the posters; move one with `POSTER_<name>=SECONDS`.
-- `npm run videos -- aprs` re-encodes only that one. The encodes are committed (Pages serves them).
+- The story: one screen stays pinned while six chapters scroll past; each chapter swaps in a short, silent, screen-only loop (`src/loops/NAME.mp4`, 480 x 640, and a `NAME.webp` still). Chapter text is in `src/index.njk`'s front matter.
+- `npm run loops` records the loops from the simulator with ferrite's recorder (`scripts/loops.py`: each chapter's key script is there; needs the ferrite checkout, cargo, ffmpeg and ImageMagick). `npm run loops -- scope` redoes one.
+- Reduced motion: no video, the stills swap. Without JavaScript: the chapters stack, each with its still.
+- The Watch grid: four full videos, `src/video/{tour,unique,aprs,lowpower}.mp4` with `.jpg` posters. `npm run videos` makes them from `ferrite/target/promo/` (render with `tools/promo/mkvideo.py` first; needs ffmpeg): H.264 1280x720 (CRF 26), AAC 128k, faststart. Look at the posters; move one with `POSTER_<name>=SECONDS`.
+- All encodes are committed (Pages serves them).
 
 ## Deploy plan (not set up yet)
 

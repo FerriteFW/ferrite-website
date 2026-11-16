@@ -10,12 +10,11 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     "src/img": "img",
     "src/video": "video",
+    "src/loops": "loops",
     "src/assets": "assets",
     "src/favicon.ico": "favicon.ico",
     "src/favicon.svg": "favicon.svg",
     "src/apple-touch-icon.png": "apple-touch-icon.png",
-    // The web simulator's wasm, copied in by `npm run sim` (see README).
-    "vendor/sim/ferrite_sim_web.wasm": "try/ferrite_sim_web.wasm",
   });
   eleventyConfig.addWatchTarget("src/assets/");
 

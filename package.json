@@ -8,8 +8,8 @@
     "build:preview": "rm -rf _preview && eleventy --output=_preview",
     "serve": "rm -rf _preview && eleventy --serve --output=_preview",
     "start": "npm run serve",
-    "sim": "node scripts/copy-sim.mjs",
-    "videos": "node scripts/videos.mjs"
+    "videos": "node scripts/videos.mjs",
+    "loops": "python3 scripts/loops.py"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.7",

@@ -2,41 +2,73 @@
 layout: layouts/base.njk
 title: "Ferrite"
 description: "Ferrite is new firmware for the Radtel RT-950 Pro, written from scratch. Free, with its source public."
-videos:
-  - file: tour
-    title: "The tour"
-    line: "Three slots, the band scope, a channel on one page, crossband, APRS messages, shortwave and Ferrite Console."
-  - file: unique
-    title: "What only Ferrite does"
-    line: "Resting current, APRS that isn't missed, the decoder, FX.25, faster Bluetooth, and a radio built not to brick."
-  - file: aprs
-    title: "APRS on the radio"
-    line: "APRS on slot C beside your two voice slots: the card, beacons, telemetry, FX.25 and messages."
-  - file: lowpower
+chapters:
+  - id: slots
+    title: "Three slots, one radio"
+    text: "Talk on the slot in front while the other two keep listening. SLOT brings the next one forward."
+  - id: scope
+    title: "The band scope"
+    text: "Hold 1 to see what's on the air around you. The knob moves the marker, and the strongest signal is named below."
+  - id: aprs
+    title: "APRS on slot C"
+    text: "Slot C decodes APRS in the background while A and B stay yours for voice. Its card shows who was heard, how far away, and new messages."
+  - id: crossband
+    title: "Crossband repeater"
+    text: "What's heard on one band goes out on the other, and back. Who's passing, the timeout and the last 30 minutes, live."
+  - id: hf
+    title: "Shortwave"
+    text: "The broadcast receiver also tunes shortwave and the HF bands, in AM, on its own screen."
+  - id: lowpower
     title: "Low Power Mode"
-    line: "One setting for when the battery matters more than features, and one hold to get everything back."
+    text: "One switch keeps only what you need to talk on one frequency. Hold SIDE1 and SIDE2 to get everything back."
+videos:
+  - { file: tour, title: "The tour", length: "1:48" }
+  - { file: unique, title: "What only Ferrite does", length: "1:31" }
+  - { file: aprs, title: "APRS on the radio", length: "1:58" }
+  - { file: lowpower, title: "Low Power Mode", length: "0:49" }
 ---
-<section class="intro">
-  <div class="wrap">
-    <h1>Ferrite</h1>
-    <p class="lead">Free firmware for the <a href="{{ site.radio }}" rel="sponsored">Radtel RT-950 Pro</a>
-      (affiliate link), written from scratch, with its source public.</p>
-    <div class="actions">
-      <a class="btn solid" href="/try/">Try it</a>
-      <a class="btn" href="/download/">Download</a>
+<script>document.documentElement.classList.add("js")</script>
+<section class="story wrap">
+  <div class="story-screen" aria-hidden="true">
+    <div class="screen story-frame">
+      <img class="layer on" data-ch="hero" src="/img/home.webp" alt="" width="480" height="640">
+      {%- for c in chapters %}
+      <video class="layer" data-ch="{{ c.id }}" data-src="/loops/{{ c.id }}.mp4" poster="/loops/{{ c.id }}.webp" muted playsinline loop preload="none" width="480" height="640"></video>
+      {%- endfor %}
     </div>
+  </div>
+
+  <div class="story-text">
+    <header class="chapter hero-copy" data-ch="hero">
+      <h1>Ferrite</h1>
+      <p class="lead">Free firmware for the <a href="{{ site.radio }}" rel="sponsored">Radtel RT-950 Pro</a>
+        (affiliate link), written from scratch, with its source public.</p>
+      <div class="actions">
+        <a class="btn solid" href="/features/">See what it does</a>
+        <a class="btn" href="/download/">Download</a>
+      </div>
+    </header>
+    {%- for c in chapters %}
+    <section class="chapter" data-ch="{{ c.id }}">
+      <img class="ch-poster" src="/loops/{{ c.id }}.webp" alt="" width="240" height="320" loading="lazy">
+      <h2>{{ c.title }}</h2>
+      <p>{{ c.text }}</p>
+    </section>
+    {%- endfor %}
   </div>
 </section>
 
-<div class="wrap videos">
-  {%- for v in videos %}
-  <section class="video">
-    <h2>{{ v.title }}</h2>
-    <p class="sub">{{ v.line }}</p>
-    <video controls preload="none" playsinline poster="/video/{{ v.file }}.jpg" width="1280" height="720">
-      <source src="/video/{{ v.file }}.mp4" type="video/mp4">
-      <a href="/video/{{ v.file }}.mp4">Watch “{{ v.title }}” (MP4)</a>
-    </video>
-  </section>
-  {%- endfor %}
-</div>
+<section class="wrap watch" aria-labelledby="watch">
+  <h2 id="watch">Watch</h2>
+  <ul class="tiles">
+    {%- for v in videos %}
+    <li>
+      <a class="tile" href="/video/{{ v.file }}.mp4" data-video="/video/{{ v.file }}.mp4">
+        <span class="tile-media"><img src="/video/{{ v.file }}.jpg" alt="" width="1280" height="720" loading="lazy"><span class="play" aria-hidden="true"></span></span>
+        <span class="tile-title">{{ v.title }} <span class="tile-len">· {{ v.length }}</span></span>
+      </a>
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+<script src="/assets/home.js" defer></script>
