@@ -2,6 +2,6 @@
 export default {
   layout: "layouts/post.njk",
   // The byline; a post can set its own `author` in its front matter.
-  author: "Alex Harvey",
+  author: "Alex Harvey, VA7IF",
   permalink: "/blog/{{ page.fileSlug }}/",
 };
