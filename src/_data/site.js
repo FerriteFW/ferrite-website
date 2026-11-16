@@ -33,6 +33,9 @@ export default {
   // The radio, through Ferrite's Radtel affiliate link everywhere. Called an affiliate link only on the Bench &
   // support page, where buying through it is offered as a way to support the project.
   radio: "https://www.radtels.com/products/radtel-rt-950-pro-27mhz-tx-rx-10w-walkie-talkie-am-fm-usb-lsb-cw-receive-gps-aprs-wireless-bluetooth-phone-programming-noaa-two-way-radio?ref=FERRITEFW&variant=44669996794064",
+  // Radtel's coupon for Ferrite (Nov 11, 2026): code ALEXHARVEY, 2% off; this link applies it and keeps the ref.
+  // Offered on the Bench & support page only, beside the affiliate link.
+  radioCoupon: { code: "ALEXHARVEY", off: "2%", url: "https://www.radtels.com/discount/ALEXHARVEY?ref=FERRITEFW" },
   licence: {
     name: "PolyForm Noncommercial License 1.0.0",
     url: "https://polyformproject.org/licenses/noncommercial/1.0.0/",
