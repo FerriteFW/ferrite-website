@@ -177,10 +177,29 @@ description: "What Ferrite does on the Radtel RT-950 Pro today, and the measurem
         Hours count the stock pack as 2000 mAh usable.</p>
 
       <h3>APRS decoder</h3>
-      <p>Ferrite decodes APRS on the radio's own processor. Run side by side with Dire Wolf on the same audio, it
-        decodes more packets than Dire Wolf at its default settings on every test we have. On the WA8LMF TNC Test
-        CD it is in the top group, level with Dire Wolf's published figures.</p>
-      <p>Frames with a correct checksum, off-air recordings at 16 kHz:</p>
+      <p>Ferrite decodes APRS inside the radio, on its own processor in about 1.7 KB of RAM, and scores with the
+        best decoders there are, PC software included. On the WA8LMF TNC Test CD, the usual yardstick, the radio's
+        own receive path decodes 1,011 and 1,007 packets: level with Dire Wolf on a PC, and ahead of every hardware
+        TNC and ESP32 decoder published but one. No other radio with a built-in decoder has published results.</p>
+      <p>Packets with a correct checksum on the test CD's two tracks (published results, and ours):</p>
+    </div>
+    <div class="tablewrap prose">
+      <table>
+        <tr><th>Decoder</th><th class="n">Track 1</th><th class="n">Track 2</th></tr>
+        <tr><td>UZ7HO SoundModem (PC)</td><td class="n">1,027</td><td class="n">1,022</td></tr>
+        <tr><td>Mobilinkd TNC3</td><td class="n">1,015</td><td class="n">1,012</td></tr>
+        <tr><td>Dire Wolf 1.5 (PC)</td><td class="n">1,012</td><td class="n">1,008</td></tr>
+        <tr><td class="em">Ferrite, inside the radio</td><td class="n em">1,011</td><td class="n em">1,007</td></tr>
+        <tr><td>ESP32APRS_Audio</td><td class="n">1,006</td><td class="n">997</td></tr>
+        <tr><td>esp32-afsk</td><td class="n">1,005</td><td class="n">947</td></tr>
+        <tr><td>KPC-3+ (hardware TNC)</td><td class="n">989</td><td class="n">925</td></tr>
+      </table>
+    </div>
+    <div class="prose">
+      <p class="note">Published counts from WB2OSZ's "Battle of the TNCs" (Jan 2019) and Mobilinkd (Feb 2020):
+        different people, setups and times, and a difference of 10 packets is 1 %.</p>
+      <p>Off the air, side by side with PC software on the same recordings (frames with a correct checksum,
+        16 kHz):</p>
     </div>
     <div class="tablewrap prose">
       <table>
