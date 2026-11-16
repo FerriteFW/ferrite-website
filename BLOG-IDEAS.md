@@ -1,7 +1,7 @@
 # Blog post ideas
 
 Posts we want to write, roughly in no order. A post starts as a `draft: true` file in `src/blog/posts/` (see
-`POSTING.md`). Say only what is built and measured; modest tone; no version numbers.
+`POSTING.md`). How posts read: BLOG-STYLE.md.
 
 - **Why Ferrite is written in Rust.** Drafted: `src/blog/posts/2026-11-01-why-rust.md`. The launch post.
 - **Why we test everything, and why we chase coverage.** Every change runs thousands of host tests, the full
