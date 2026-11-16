@@ -12,7 +12,7 @@ const site = join(root, "_site");
 const dist = join(root, "dist");
 const sites = { www: "ferritefw.dev", blog: "blog.ferritefw.dev" };
 // Files every page loads from its own host (root-relative /assets/site.css and so on), so the blog gets copies.
-const shared = ["assets", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "logo.svg"];
+const shared = ["assets", "favicon.ico", "favicon.svg", "apple-touch-icon.png"];
 
 if (!existsSync(site)) {
   console.error("no _site/: run the Eleventy build first");

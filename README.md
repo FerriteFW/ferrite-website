@@ -1,7 +1,7 @@
 # ferritefw.dev
 
 The Ferrite website and blog, built with [Eleventy 3](https://www.11ty.dev). One build makes both sites.
-No client JavaScript except the simulator page.
+No client JavaScript except the simulator page (`/try/`).
 
 ## Build and preview
 
@@ -30,9 +30,9 @@ One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md).
 
 ## The simulator (Try it)
 
-- The page `/try/` introduces it; the simulator itself is at `/try/sim/`, its own page as built.
-- To refresh it: `cargo simweb` in `ferrite/`, then `npm run sim` here. It copies `sim-web/index.html` and the `.wasm` into `vendor/sim/`.
-- `vendor/sim/` is committed (the wasm is under 1 MB), so the site builds without a Rust toolchain. Commit it again after a refresh.
+- `/try/` is the site's own page: the screen (cropped from what the wasm draws), plain buttons for every key, and a short key legend. Its script is `src/assets/try.js`; it uses the wasm's API (`ferrite/sim-web/README.md`).
+- The wasm is `vendor/sim/ferrite_sim_web.wasm`, served as `/try/ferrite_sim_web.wasm`. `/try/sim/` only redirects to `/try/`.
+- To refresh it: `cargo simweb` in `ferrite/`, then `npm run sim` here, and commit the new wasm (it is under 1 MB, so the site builds without a Rust toolchain).
 - `FERRITE_DIR=/path/to/ferrite npm run sim` if the checkout isn't at `../ferrite`.
 
 ## Deploy plan (not set up yet)

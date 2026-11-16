@@ -1,43 +1,82 @@
 ---
 layout: layouts/base.njk
 title: "Try it"
-description: "The Ferrite simulator: the firmware's own screen code, running on a pretend radio in your browser."
+description: "Try Ferrite in your browser: the firmware's own screen code, running on a pretend radio. Nothing is sent anywhere."
 ---
 <div class="wrap">
-  <header class="page-head">
+  <header class="page-head try-head">
     <h1>Try it</h1>
-    <p class="lead">The simulator runs Ferrite's own screen code in your browser, on a pretend radio with three
-      slots and a few sample channels. Press the keys, turn the knob, and see how it feels before you install
-      anything.</p>
-    <div class="actions">
-      <a class="btn solid" href="/try/sim/">Open the simulator</a>
-    </div>
+    <p class="lead">The firmware's own screen code, running in your browser on a pretend radio. Nothing is sent
+      anywhere.</p>
   </header>
 
-  <section class="section">
-    <div class="feature" style="padding:0">
-      <div class="prose">
-        <h2>Things to try</h2>
-        <ul>
-          <li><kbd>MENU</kbd> on home opens quick settings; hold it for the full menu.</li>
-          <li><kbd>SLOT</kbd> moves between slots A, B and C. Hold it to edit the slot in place.</li>
-          <li>On a VFO, type a frequency on the digits: <kbd>1</kbd><kbd>4</kbd><kbd>6</kbd><kbd>5</kbd><kbd>2</kbd><kbd>0</kbd>.</li>
-          <li>Hold <kbd>1</kbd> for the band scope, or hold <kbd>4</kbd> to turn watch on or off.</li>
-          <li><kbd>MENU</kbd> <kbd>0</kbd> <kbd>5</kbd> <kbd>3</kbd>, then the knob, turns APRS mode on.</li>
-          <li>Hold <kbd>BACK</kbd> to go home from anywhere.</li>
-        </ul>
-        <h2>On a computer</h2>
-        <p>Click the radio first so it has the keyboard. <kbd>Enter</kbd> is MENU/OK, <kbd>Esc</kbd> is BACK, the
-          arrows are the arrows, <kbd>[</kbd> <kbd>]</kbd> or the mouse wheel turn the knob, and <kbd>S</kbd> is
-          SLOT. The simulator page lists every key.</p>
-        <p>The simulator keeps its settings and channels in your browser, as the radio keeps them in flash, so your
-          changes are still there next time.</p>
-        <p class="note">The radio part is pretend: nothing is received or sent, and the signals you see are made
-          up.</p>
+  <div class="sim" id="sim" tabindex="-1">
+    <div class="sim-screen">
+      <canvas id="screen" width="480" height="640" aria-label="The radio's screen"></canvas>
+      <p class="sim-msg" id="sim-msg">Loading the radio…</p>
+      <noscript><p class="sim-msg">The simulator needs JavaScript.</p></noscript>
+    </div>
+
+    <div class="sim-keys" aria-label="The radio's keys">
+      <div class="keyrow side">
+        <button type="button" data-key="22">PTT A</button>
+        <button type="button" data-key="23">PTT B</button>
+        <button type="button" data-key="20">SIDE1</button>
+        <button type="button" data-key="21">SIDE2</button>
       </div>
-      <div class="shots">
-        <figure class="screen"><img src="/img/home.webp" alt="The home screen with three slots" width="240" height="320"></figure>
+      <div class="keyrow knob">
+        <button type="button" data-knob="-1" aria-label="Knob left">◀ Knob</button>
+        <button type="button" data-knob="1" aria-label="Knob right">Knob ▶</button>
       </div>
+      <div class="pad nav">
+        <button type="button" data-key="12" class="k-menu">MENU<small>OK</small></button>
+        <button type="button" data-key="16" class="k-up" aria-label="Up">▲</button>
+        <button type="button" data-key="15" class="k-back">BACK</button>
+        <button type="button" data-key="18" class="k-left" aria-label="Left">◀</button>
+        <button type="button" data-key="17" class="k-down" aria-label="Down">▼</button>
+        <button type="button" data-key="19" class="k-right" aria-label="Right">▶</button>
+        <button type="button" data-key="13" class="k-slot">SLOT<small>A·B·C</small></button>
+        <button type="button" data-key="14" class="k-vm">V/M</button>
+      </div>
+      <div class="pad digits">
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2<small>ABC</small></button>
+        <button type="button" data-key="3">3<small>DEF</small></button>
+        <button type="button" data-key="4">4<small>GHI</small></button>
+        <button type="button" data-key="5">5<small>JKL</small></button>
+        <button type="button" data-key="6">6<small>MNO</small></button>
+        <button type="button" data-key="7">7<small>PQRS</small></button>
+        <button type="button" data-key="8">8<small>TUV</small></button>
+        <button type="button" data-key="9">9<small>WXYZ</small></button>
+        <button type="button" data-key="10">*</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key="11">#</button>
+      </div>
+      <p class="note">Hold a key as you would on the radio: a long press is 0.7 seconds.</p>
+      <div class="keyrow tools">
+        <button type="button" id="reset" class="plain">Reset the radio</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="section try-more">
+    <div class="prose">
+      <h2>Things to try</h2>
+      <ul>
+        <li><kbd>MENU</kbd> opens quick settings for the slot in front. Hold it for the full menu.</li>
+        <li><kbd>SLOT</kbd> brings slot A, B or C to the front. Hold it to edit the slot in place.</li>
+        <li>Hold <kbd>1</kbd> for the band scope.</li>
+        <li><kbd>MENU</kbd> <kbd>0</kbd> <kbd>5</kbd> <kbd>3</kbd>, then the knob, turns APRS mode on.</li>
+        <li>Hold <kbd>BACK</kbd> to go home from anywhere.</li>
+      </ul>
+      <h2>On a keyboard</h2>
+      <p>Click the screen first. <kbd>0</kbd>–<kbd>9</kbd> digits, <kbd>Enter</kbd> MENU/OK, <kbd>Esc</kbd> BACK,
+        arrows, <kbd>,</kbd> and <kbd>.</kbd> for <kbd>*</kbd> and <kbd>#</kbd>, <kbd>S</kbd> SLOT, <kbd>V</kbd> V/M,
+        <kbd>Q</kbd> and <kbd>W</kbd> SIDE1 and SIDE2, <kbd>Space</kbd> PTT A, <kbd>[</kbd> <kbd>]</kbd> or the mouse
+        wheel for the knob.</p>
+      <p class="note">The radio part is pretend: nothing is received or transmitted, and the stations you see are made
+        up. Your settings and channels are kept in this browser only. Reset brings back the sample radio.</p>
     </div>
   </section>
 </div>
+<script src="/assets/try.js" defer></script>

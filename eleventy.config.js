@@ -13,9 +13,8 @@ export default function (eleventyConfig) {
     "src/favicon.ico": "favicon.ico",
     "src/favicon.svg": "favicon.svg",
     "src/apple-touch-icon.png": "apple-touch-icon.png",
-    "src/logo.svg": "logo.svg",
-    // The web simulator, copied in by `npm run sim` (see README).
-    "vendor/sim": "try/sim",
+    // The web simulator's wasm, copied in by `npm run sim` (see README).
+    "vendor/sim/ferrite_sim_web.wasm": "try/ferrite_sim_web.wasm",
   });
   eleventyConfig.addWatchTarget("src/assets/");
 
