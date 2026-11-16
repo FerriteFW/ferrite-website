@@ -1,4 +1,5 @@
-// The bench page's lists. Prices are what each line cost in Canadian dollars, shipping and tax included.
+// The bench page's lists. Spent: what each line cost in Canadian dollars, shipping and tax included. Wish list:
+// estimates in US dollars (list prices).
 // group: "radios", "test" or "cables". The totals are worked out below at build time.
 
 const BENCH = [
@@ -37,7 +38,7 @@ const WISH = [
   { item: "Signal generator", low: null, high: null, why: "A clean, known signal: receiver sensitivity and squelch levels." },
   { item: "Step attenuators", low: null, high: null, why: "Weak-signal tests at known levels." },
   { item: "Rigol RSA804 spectrum analyser", low: 2500, high: 2500, why: "Harmonics and spurious emissions on transmit." },
-  { item: "iPad mini (A17 Pro, 128 GB)", low: 679, high: 849, why: "Ferrite Console as an iPad app, over Bluetooth: testing it on a real tablet." },
+  { item: "iPad mini (A17 Pro, 128 GB)", low: 499, high: 499, why: "Ferrite Console as an iPad app, over Bluetooth: testing it on a real tablet." },
 ];
 
 const GROUPS = { radios: "Radios", test: "Test equipment", cables: "Cables and connectors" };
