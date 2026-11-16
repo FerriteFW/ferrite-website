@@ -29,3 +29,31 @@ Posts we want to write, roughly in no order. A post starts as a `draft: true` fi
   processor: three slicers, soft repair of the least certain bits, FX.25; scored on off-air recordings and the
   WA8LMF test CD against Dire Wolf and published results, every change re-run on the recordings. Top tier, inside
   a radio. Sources: `docs/showcase/aprs-decoder.md`, `ferrite/digimodes/uafsk`.
+- **Radio UIs are stuck in the dark ages.** The design thinking: one fixed key layout, menu numbers you learn once
+  and type from muscle memory, the most-used things the fewest presses away, the screen always telling you what
+  the keys do next. Opinionated on purpose. Sources: `docs/manual/` (KEY, MENU chapters), the user guide's key card.
+- **Three slots, two radio chips.** How two BK4829s listen to three things at once: the watch's turns, sharing a
+  VHF chip, APRS getting the receive path every other turn, never deaf more than 70 ms. Sources: WATCH rules
+  (`docs/manual/`), `ferrite-core/src/watch.rs`, decisions 279 and 295.
+- **Installing without bricking.** The stock bootloader is never touched, Console backs up the whole radio first
+  with a read-only reader image, calibration is never erased, and going back to stock is built in. Sources:
+  decision 264, `docs/manual/03-installing.md`, `30-updating.md`.
+- **Transmit safety in the firmware.** Band limits, power levels, timeout, the duty limit, and Dry TX for bench
+  work with the PA at zero; transmit power within 4 % of stock on every level. Sources: TX rules,
+  `docs/research/tx-power.md`.
+- **The case of the deaf microphone.** Why the processor can't hear the mic on a stock RT-950 Pro: the VOX
+  envelope detector on PA0, the shared mic line, everything we tried, and the mod that could fix it (parked, not
+  done). Pure hardware detective story. Sources: `docs/research/mic-audio.md`, `mod-pa0-mic-audio.md` (no
+  third-party photos).
+- **Videos that are also tutorials.** The promo videos are recorded from the firmware's own screens by a script of
+  key presses, with every key shown as a keycap, so a feature video doubles as a how-to. Sources:
+  `ferrite/tools/promo/README.md`.
+- **A radio programmer in your browser.** Ferrite Console: Web Serial and Bluetooth, the radio's own code compiled
+  to WebAssembly, Live View drawn from the firmware's own drawing code, signed releases checked before install.
+  Sources: the ferrite-console repo, decision 291.
+- **Homelab CI for a handheld.** Every release built, tested (host, simulator UI, coverage) and signed on a
+  Forgejo runner in a VM, in about 12 minutes; what we cut to get there (tests run once, under coverage).
+  Sources: `.forgejo/workflows/release.yml`.
+- **Drawing a UI through a 0.24 µs-a-byte straw.** Making the screen fast on a slow panel bus and 96 KB of RAM:
+  banded drawing, fast flash for the hot paths, profiling on the radio. Sources: CLAUDE.md's size-and-speed
+  lessons, `ferrite_ui::prof`, the DISP rules.
