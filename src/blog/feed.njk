@@ -5,7 +5,7 @@ eleventyExcludeFromCollections: true
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-CA">
   <title>Ferrite blog</title>
-  <subtitle>News from Ferrite, free firmware for the Radtel RT-950 Pro.</subtitle>
+  <subtitle>News from Ferrite, free radio firmware with its source public.</subtitle>
   <link href="{{ site.absolute.blog }}/feed.xml" rel="self"/>
   <link href="{{ site.absolute.blog }}/"/>
   <updated>{% if collections.posts.length %}{{ collections.posts | getNewestCollectionItemDate | dateToRfc3339 }}{% else %}2026-10-29T00:00:00Z{% endif %}</updated>

@@ -9,7 +9,7 @@ const production = process.env.ELEVENTY_ENV === "production";
 export default {
   production,
   name: "Ferrite",
-  description: "Free firmware for the Radtel RT-950 Pro, with its source public.",
+  description: "Free firmware for the Radtel RT-950 Pro, and radios built on the same hardware, with its source public.",
 
   // Where each site lives. `www` and `blog` are prefixes: "" means the root of this server.
   urls: {
