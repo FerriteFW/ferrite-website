@@ -1,6 +1,6 @@
 # Blog style
 
-How Ferrite's blog posts read, so a draft comes out right the first time. Posts are written as Alex.
+How Ferrite's blog posts read, so a draft comes out right the first time. Posts are written as Alex and carry his byline (`author` defaults to Alex Harvey).
 
 ## Voice
 
@@ -12,6 +12,10 @@ How Ferrite's blog posts read, so a draft comes out right the first time. Posts 
 - **Some energy, earned.** Enthusiasm where the result deserves it, a bit of humour, never marketing hype or
   superlatives we can't back up.
 - **Honest about trade-offs.** What it cost, what isn't done yet, what we got wrong first.
+- **A bit of Hackaday.** Write it like a good Hackaday post: a wry hook, real technical meat (the part numbers,
+  registers, flags, measurements, the war story of what went sideways), parenthetical asides, a little
+  self-deprecation, and the fun of making a thing do more than it shipped with. Nerdy is good; explain just enough
+  that a newer ham can follow.
 - **Short.** Short paragraphs (two to four sentences), a heading every few paragraphs, 600 to 1,200 words. Cut any
   sentence that doesn't add something.
 
