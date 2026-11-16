@@ -1,49 +1,23 @@
-// Watch: one video plays at a time, the one at least half in view whose centre is nearest the window's centre;
-// the rest pause. Re-picked on scroll and resize (once a frame at most). Nothing is fetched until a video first
-// plays (preload="none"). A tap pauses or plays a video; one the visitor paused stays paused until tapped again,
-// and another in view may play meanwhile. With reduced motion nothing plays by itself: a play button waits.
-// Without JavaScript: plain <video controls>.
-const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const clips = [...document.querySelectorAll(".clip-media")].map((box) => {
+// Watch: nothing plays by itself. Each video shows its poster and a play button; a tap starts it with the
+// browser's own controls, and starting one pauses the others. When a video ends, its play button comes back.
+// Nothing is fetched until a video is started (preload="none"). Without JavaScript: plain <video controls>.
+const vids = [];
+for (const box of document.querySelectorAll(".clip-media")) {
   const v = box.querySelector("video"), btn = box.querySelector(".clip-play");
-  const clip = { box, v, held: still }; // held: paused by the visitor (or by reduced motion)
+  vids.push(v);
   v.controls = false;
-  v.muted = true;
-  const mark = () => { btn.hidden = !v.paused; };
-  v.addEventListener("play", mark);
-  v.addEventListener("pause", mark);
-  mark();
-  box.addEventListener("click", () => {
-    if (v.paused) {
-      clip.held = false;
-      for (const c of clips) if (c !== clip) c.v.pause();
-      v.play().catch(() => {});
-    } else {
-      clip.held = true;
-      v.pause();
-      pick();
-    }
+  btn.hidden = false;
+  btn.addEventListener("click", () => {
+    btn.hidden = true;
+    v.controls = true;
+    v.play().catch(() => {});
   });
-  return clip;
-});
-
-function pick() {
-  const mid = innerHeight / 2;
-  let best = null, bestDist = Infinity;
-  for (const c of clips) {
-    const r = c.box.getBoundingClientRect();
-    const shown = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
-    if (c.held || shown < r.height / 2) continue;
-    const dist = Math.abs(r.top + r.height / 2 - mid);
-    if (dist < bestDist) { best = c; bestDist = dist; }
-  }
-  for (const c of clips) {
-    if (c === best) { if (c.v.paused) c.v.play().catch(() => {}); }
-    else if (!c.v.paused) c.v.pause();
-  }
+  v.addEventListener("play", () => {
+    btn.hidden = true;
+    for (const o of vids) if (o !== v && !o.paused) o.pause();
+  });
+  v.addEventListener("ended", () => {
+    v.controls = false;
+    btn.hidden = false;
+  });
 }
-let queued = false;
-const soon = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; pick(); }); } };
-addEventListener("scroll", soon, { passive: true });
-addEventListener("resize", soon);
-soon();

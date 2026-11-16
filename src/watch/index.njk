@@ -11,7 +11,7 @@ description: "Short videos of Ferrite on the Radtel RT-950 Pro, on the firmware'
   {%- for v in videos %}
   <figure class="clip">
     <div class="clip-media">
-      <video src="/video/{{ v.file }}.mp4" poster="/video/{{ v.file }}.jpg" width="1280" height="720" controls muted playsinline loop preload="none"></video>
+      <video src="/video/{{ v.file }}.mp4" poster="/video/{{ v.file }}.jpg" width="1280" height="720" controls muted playsinline preload="none"></video>
       <button class="clip-play" type="button" aria-label="Play {{ v.title }}" hidden></button>
     </div>
     <figcaption><span class="tile-title">{{ v.title }} <span class="tile-len">· {{ v.length }}</span></span>{{ v.line }}</figcaption>

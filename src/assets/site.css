@@ -237,11 +237,11 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 /* Watch: one video per row, playing while in view. */
 .clips { max-width: 1088px; }
 .clip { margin: 0 0 14vh; }
-.clip-media { position: relative; cursor: pointer; }
+.clip-media { position: relative; }
 .clip video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 8px; background: var(--panel); }
-.clip-play { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; padding: 0; border-radius: 50%; background: rgba(7, 8, 10, 0.6); border: 1px solid rgba(230, 232, 235, 0.35); cursor: pointer; }
-.clip-play::after { content: ""; position: absolute; left: 25px; top: 21px; border-style: solid; border-width: 11px 0 11px 18px; border-color: transparent transparent transparent var(--text); }
-.clip-media:hover .clip-play { border-color: var(--blue); }
+.clip-play { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; padding: 0; border-radius: 50%; background: rgba(7, 8, 10, 0.6); border: 1px solid rgba(230, 232, 235, 0.35); cursor: pointer; }
+.clip-play::after { content: ""; position: absolute; left: 29px; top: 25px; border-style: solid; border-width: 11px 0 11px 18px; border-color: transparent transparent transparent var(--text); }
+.clip-play:hover, .clip-play:focus-visible { border-color: var(--blue); background: rgba(7, 8, 10, 0.75); }
 .clip-play[hidden] { display: none; }
 .clip figcaption { margin-top: 14px; color: var(--sub); font-size: 14px; max-width: var(--measure); text-align: left; }
 .tile-title { display: block; margin-bottom: 4px; font-size: 15px; color: var(--text); }
