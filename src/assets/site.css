@@ -266,3 +266,19 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 .devnav a:hover, .devnav a.on { color: var(--blue); }
 .devnav a.on { font-weight: 600; }
 .prose p.gen { margin-top: 36px; color: var(--dim); }
+
+/* /s: share codes (Ferrite Pocket): the form, the QR code */
+.share-form input, .share-form select, .share-link { font: inherit; font-size: 14px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; width: 100%; box-sizing: border-box; }
+.share-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--sub); }
+.share-form label small { color: var(--dim); }
+.share-form label.check { flex-direction: row; align-items: center; gap: 6px; padding-top: 18px; }
+.share-form label.check input { width: auto; }
+.share-zone { max-width: 320px; margin-bottom: 16px; }
+.share-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px 12px; border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin: 0 0 12px; }
+.share-row .share-remove { align-self: end; justify-self: start; }
+.share-out { display: grid; gap: 24px; align-items: start; margin-top: 24px; }
+@media (min-width: 720px) { .share-out { grid-template-columns: 300px 1fr; } }
+.share-qr svg { width: 100%; max-width: 300px; height: auto; border-radius: 8px; display: block; }
+.share-link { font-family: var(--mono); font-size: 12px; }
+.share-out .btn { margin: 0 8px 8px 0; }
+.muted { color: var(--dim); }

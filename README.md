@@ -1,7 +1,7 @@
 # ferritefw.dev
 
 The Ferrite website and blog, built with [Eleventy 3](https://www.11ty.dev). One build makes both sites.
-Client JavaScript only on Home (`src/assets/home.js`, the story's loops), Watch (`src/assets/watch.js`) and `/s` (Ferrite Pocket's share links: it decodes the channels in the link's fragment, in the browser); every page works without it.
+Client JavaScript only on Home (`src/assets/home.js`, the story's loops), Watch (`src/assets/watch.js`) and `/s` (`src/assets/share.js`: Ferrite Pocket's share codes, read from the link's fragment or made from a form, with a QR code from `src/assets/qrcode.js`, Kazuhiko Arase's qrcode-generator 1.4.4, MIT, as published); every page works without it.
 `src/.well-known/apple-app-site-association` lets those `/s` links open Ferrite Pocket on an iPhone.
 
 ## Build and preview
