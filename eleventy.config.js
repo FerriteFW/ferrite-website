@@ -9,6 +9,7 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addPassthroughCopy({
     "src/img": "img",
+    "src/video": "video",
     "src/assets": "assets",
     "src/favicon.ico": "favicon.ico",
     "src/favicon.svg": "favicon.svg",

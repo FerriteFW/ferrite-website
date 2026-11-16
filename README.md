@@ -11,7 +11,7 @@ No client JavaScript except the simulator page (`/try/`).
 
 ## Where things are
 
-- `src/` pages: `index.njk` (Home), `features/`, `download/`, `try/`, `bench/`, `blog/`.
+- `src/` pages: `index.njk` (Home: intro and videos), `features/`, `download/`, `try/`, `bench/`, `blog/`.
 - `src/_data/site.js`: the URL map, links, licence, the release switch and the bench page's `SUPPORT_URL` and `CONTACT` (each section stays hidden until set).
 - `src/_data/bench.js`: the bench and wish lists, in whole Canadian dollars.
 - `src/assets/site.css`: the one stylesheet.
@@ -34,6 +34,12 @@ One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md).
 - The wasm is `vendor/sim/ferrite_sim_web.wasm`, served as `/try/ferrite_sim_web.wasm`. `/try/sim/` only redirects to `/try/`.
 - To refresh it: `cargo simweb` in `ferrite/`, then `npm run sim` here, and commit the new wasm (it is under 1 MB, so the site builds without a Rust toolchain).
 - `FERRITE_DIR=/path/to/ferrite npm run sim` if the checkout isn't at `../ferrite`.
+
+## Videos (Home)
+
+- Home is a short intro and four videos: `src/video/{tour,unique,aprs,lowpower}.mp4`, each with a `.jpg` poster. Titles and lines are in `src/index.njk`'s front matter.
+- To refresh them: render with `tools/promo/mkvideo.py` in `ferrite/`, then `npm run videos` here (needs ffmpeg). It writes H.264 1280x720 (CRF 26), AAC 128k, faststart, and a poster frame. Look at the posters; move one with `POSTER_<name>=SECONDS`.
+- `npm run videos -- aprs` re-encodes only that one. The encodes are committed (Pages serves them).
 
 ## Deploy plan (not set up yet)
 
