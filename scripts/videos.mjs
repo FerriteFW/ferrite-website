@@ -1,4 +1,4 @@
-// Web versions of the promo videos for Home: H.264 1280x720 (CRF 26), AAC 128k, faststart, plus a JPEG poster.
+// Web versions of the promo videos for /watch/: H.264 1280x720 (CRF 26), no audio, faststart, plus a JPEG poster.
 // Sources: ferrite/target/promo/*.mp4 (render them with ferrite's tools/promo/mkvideo.py first).
 //   npm run videos                       all four
 //   npm run videos -- aprs               only these
@@ -51,11 +51,10 @@ for (const [name, v] of Object.entries(VIDEOS)) {
   const jpg = join(out, name + ".jpg");
   const at = String(process.env["POSTER_" + name] || v.poster);
   const trim = v.start ? ["-ss", String(v.start)] : [];
-  const fadeIn = v.start ? ["-af", "afade=t=in:d=0.5"] : [];
-  if (!postersOnly) execFileSync("ffmpeg", ["-v", "error", "-y", ...trim, "-i", src, ...fadeIn,
+  if (!postersOnly) execFileSync("ffmpeg", ["-v", "error", "-y", ...trim, "-i", src, "-map", "0:v:0", "-map_chapters", "-1", "-map_metadata", "-1", "-an",
     "-vf", "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=black,format=yuv420p",
     "-c:v", "libx264", "-preset", "slow", "-crf", "26", "-profile:v", "high",
-    "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", mp4], { stdio: "inherit" });
+    "-movflags", "+faststart", mp4], { stdio: "inherit" });
   poster(src, at, jpg);
   console.log(`${name}.mp4  ${(statSync(mp4).size / 1e6).toFixed(1)} MB   ${name}.jpg  ${Math.round(statSync(jpg).size / 1024)} KB (at ${at} s)`);
 }

@@ -25,6 +25,9 @@ export default {
   },
 
   discord: "https://discord.gg/fYygBVD2Kx",
+  // The source, in the header and the footer. The repo is private until 0.9 ships, so for now this link 404s
+  // for visitors; it works once FerriteFW/ferrite goes public.
+  SOURCE_URL: "https://github.com/FerriteFW/ferrite",
   // The radio, through Ferrite's Radtel affiliate link. Always say it is an affiliate link where it is used.
   radio:
     "https://www.radtels.com/products/radtel-rt-950-pro-27mhz-tx-rx-10w-walkie-talkie-am-fm-usb-lsb-cw-receive-gps-aprs-wireless-bluetooth-phone-programming-noaa-two-way-radio?ref=FERRITEFW&variant=44669996794064",
