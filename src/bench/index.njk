@@ -35,20 +35,7 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
   </section>
 
   <section class="section">
-    <p class="kicker"><span>02</span>On the bench</p>
-    <div class="grid">
-      {%- for b in bench.items %}
-      <div class="card">
-        <h3>{{ b.item }}</h3>
-        <p>{{ b.does }}</p>
-        <p><span style="color:var(--dim)">Used for:</span> {{ b.use }}</p>
-      </div>
-      {%- endfor %}
-    </div>
-  </section>
-
-  <section class="section">
-    <p class="kicker"><span>03</span>Wish list</p>
+    <p class="kicker"><span>02</span>Wish list</p>
     <p class="lead">What would let Ferrite be measured better, roughly in the order it would help.</p>
     <div class="tablewrap" style="max-width:820px">
       <table>
@@ -61,7 +48,7 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
   </section>
 
   <section class="section prose" id="licence">
-    <p class="kicker"><span>04</span>Licence</p>
+    <p class="kicker"><span>03</span>Licence</p>
     <p>We believe making money from amateur radio goes against the community and the spirit of the hobby. So
       Ferrite is free, its source is public, and it is licensed under the
       <a href="{{ site.licence.url }}">{{ site.licence.name }}</a>. In plain words:</p>
@@ -78,7 +65,7 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
 
   {% if site.SUPPORT_URL %}
   <section class="section prose" id="support">
-    <p class="kicker"><span>05</span>Donations</p>
+    <p class="kicker"><span>04</span>Donations</p>
     <p>We do love donations. They go back into the project: growing it, and more kit to hack on and share what we
       learn. If Ferrite is useful to you, please pay it forward if you can. Testing on your own radio and telling
       us what you find helps just as much.</p>
@@ -87,7 +74,7 @@ description: "The gear Ferrite is developed and tested with, what it has cost, t
   {% endif %}
 
   <section class="section prose" id="manufacturers">
-    <p class="kicker"><span>{% if site.SUPPORT_URL %}06{% else %}05{% endif %}</span>Radio manufacturers</p>
+    <p class="kicker"><span>{% if site.SUPPORT_URL %}05{% else %}04{% endif %}</span>Radio manufacturers</p>
     <p>We would be glad to work with radio manufacturers. Hardware documentation, schematics or sample units would
       let Ferrite support more radios and do it properly, and a manufacturer who wants Ferrite on its radios can
       license it from us. Either way, Ferrite stays free for the people who own the radios.</p>
