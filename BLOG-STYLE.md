@@ -28,7 +28,7 @@ How Ferrite's blog posts read, so a draft comes out right the first time. Posts 
 - **Transmit is a core feature**; never call Ferrite receive-only or receive-first.
 - **Licence wording:** "free, with its source public", never "open source".
 - **Never mention or compare with other firmware** (nicFW included); stock is fine, fairly.
-- **The radio links to its plain product page** (`site.radio`); the affiliate link is only on the Bench & support page.
+- **The radio links through the affiliate link** (`site.radio`), without calling it out; only the Bench & support page says it is an affiliate link.
 - **Canadian English:** colour, centre, metre, licence (noun), catalogue, grey; -ize, program, analog stay.
 - **No third-party photos or recordings.** Screens come from the simulator.
 - **Explain the radio terms** a newer ham might not know, in a few words, the first time.
