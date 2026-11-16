@@ -1,0 +1,25 @@
+---
+layout: layouts/base.njk
+title: "Developers · Developers"
+description: "For people building, modding or talking to Ferrite. The user guide is the other side."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>Ferrite developers</h1><p class="lead">For people building, modding or talking to Ferrite. The user guide is the other side.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/" class=on aria-current=page>Overview</a> <a href="/dev/building/">Building</a> <a href="/dev/link-protocol/">Link protocol</a> <a href="/dev/update-file/">Update file</a> <a href="/dev/codeplug/">Codeplug format</a> <a href="/dev/terminal-pages/">Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>For people building, modding or talking to Ferrite, the firmware for the RT-950 Pro. The user guide is at
+<a href="https://manual.ferritefw.dev">manual.ferritefw.dev</a>; this is the other side.</p>
+<ul>
+<li><a href="/dev/building/">Building and flashing</a>: the workspace, tests, images, build features, flashing.</li>
+<li><a href="/dev/link-protocol/">Link protocol</a>: the binary protocol on the cable and over Bluetooth, with every constant.</li>
+<li><a href="/dev/update-file/">Update file</a>: the <code>.ffw</code> file and the SPI parts.</li>
+<li><a href="/dev/codeplug/">Codeplug format</a>: the <code>.ferrite</code> files Console saves.</li>
+<li><a href="/dev/terminal-pages/">Terminal pages</a>: the stack language the cable terminal's pages are written in.</li>
+<li><a href="/dev/flash-map.html">SPI flash map</a>: the 4 MB chip's layout.</li>
+</ul>
+<p>Every page is made from the files it describes (each says which), so it matches the firmware it was built with.</p>
+</div>
+</div>
+{% endraw %}

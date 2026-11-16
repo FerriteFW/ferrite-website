@@ -1,0 +1,1163 @@
+---
+layout: layouts/base.njk
+title: "Codeplug format · Developers"
+description: "The .ferrite files Ferrite Console saves: a radio's channels and settings in one file."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>The <code>.ferrite</code> codeplug format</h1><p class="lead">The .ferrite files Ferrite Console saves: a radio&#x27;s channels and settings in one file.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/">Overview</a> <a href="/dev/building/">Building</a> <a href="/dev/link-protocol/">Link protocol</a> <a href="/dev/update-file/">Update file</a> <a href="/dev/codeplug/" class=on aria-current=page>Codeplug format</a> <a href="/dev/terminal-pages/">Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>A <code>.ferrite</code> file is a Ferrite radio's codeplug as Ferrite Console saves it: the channels and zones, the range
+presets with their skip lists, Radio Settings, APRS settings, APRS contacts, the quick messages, the waypoints and
+the DTMF memories, in one file.</p>
+<ul>
+<li>Written and read by Ferrite Console (<code>src/lib/codeplug.ts</code>, <code>src/lib/zip.ts</code>).</li>
+<li>Format version 2 (November 1, 2026: protocol 3's channel record, decision 333). Version 1 files still open.</li>
+<li>The example at the end is a test fixture (<code>ferrite-console/core/tests/fixtures/codeplug/</code>). Console's tests check
+  that each part is exactly what Console writes, and that the zipped file reads back unchanged.</li>
+</ul>
+<h2 id="the-file">The file</h2>
+<ul>
+<li>A standard ZIP archive (PKZIP). Any unzip tool opens it.</li>
+<li>Each entry is stored (method 0) or deflated (method 8). Nothing else: no ZIP64, no encryption, no folders.</li>
+<li>Names are UTF-8. Every entry's CRC-32 is checked on reading.</li>
+<li>MIME type <code>application/x-ferrite-codeplug</code>. On macOS the type is <code>dev.ferritefw.console.codeplug</code>.</li>
+<li>File name when saved: <code>&lt;callsign&gt;-&lt;yyyymmdd&gt;-&lt;hhmm&gt;.ferrite</code>, in local time (e.g. <code>VA7IF-20261030-1412.ferrite</code>).
+  <code>radio</code> when there is no callsign.</li>
+</ul>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Entry</th>
+<th>What it holds</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manifest.json</code></td>
+<td>What the file is, who saved it, which parts it has</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>channels.json</code></td>
+<td>Channels and zones</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>presets.json</code></td>
+<td>Range presets (MENU 0 1 4)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>settings.json</code></td>
+<td>Radio Settings (MENU 0)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>aprs.json</code></td>
+<td>APRS settings (MENU 0 5)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>contacts.json</code></td>
+<td>APRS contacts (the address book)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>quick.json</code></td>
+<td>The quick messages (TEXT-7)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>waypoints.json</code></td>
+<td>The waypoints (GPS-10)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>dtmf.json</code></td>
+<td>The DTMF memories and their names (DTMF-12)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>A part is there only when Console had it: a file saved before Radio Settings was read has no <code>settings.json</code>.</li>
+<li>Every part listed in the manifest must be in the zip.</li>
+<li>Readers ignore any other entry.</li>
+</ul>
+<h2 id="manifestjson">manifest.json</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>format</code></td>
+<td>string</td>
+<td>Always <code>"ferrite-codeplug"</code>.</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>integer, 1 or more</td>
+<td>The format version. This document is version 2 (version 1 below, under Older files).</td>
+</tr>
+<tr>
+<td><code>created</code></td>
+<td>string, ISO 8601 UTC</td>
+<td>When the file was saved, e.g. <code>"2026-10-30T21:12:00.000Z"</code>.</td>
+</tr>
+<tr>
+<td><code>console</code></td>
+<td>string</td>
+<td>The Console version that saved it, e.g. <code>"0.1.0"</code>.</td>
+</tr>
+<tr>
+<td><code>radio</code></td>
+<td>object</td>
+<td>What the radio said about itself. Each field is left out when unknown.</td>
+</tr>
+<tr>
+<td><code>radio.callsign</code></td>
+<td>string</td>
+<td>The radio's callsign.</td>
+</tr>
+<tr>
+<td><code>radio.firmware</code></td>
+<td>string</td>
+<td>Ferrite's version, as <code>INFO</code> gives it.</td>
+</tr>
+<tr>
+<td><code>radio.build</code></td>
+<td>string</td>
+<td>The build's name, as <code>HELLO</code> gives it (e.g. <code>tx</code>).</td>
+</tr>
+<tr>
+<td><code>radio_fingerprint</code></td>
+<td>string, 8 hex digits</td>
+<td>The radio's fingerprint, below. Left out when the radio's ID isn't known.</td>
+</tr>
+<tr>
+<td><code>parts</code></td>
+<td>array of strings</td>
+<td>The parts in the file, in this order: <code>channels</code>, <code>presets</code>, <code>settings</code>, <code>aprs</code>, <code>contacts</code>, <code>quick</code>, <code>waypoints</code>, <code>dtmf</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="the-radios-fingerprint-not-its-id">The radio's fingerprint, not its ID</h3>
+<ul>
+<li>A codeplug never holds the radio's unique ID, in the manifest or in any part.</li>
+<li>Codeplugs get shared (clubs, forums), and the ID is a permanent hardware serial (SELF-8).</li>
+<li><code>radio_fingerprint</code> stands for it: the first 8 hex digits (lowercase) of SHA-256 over the ID's 12 bytes as <code>INFO</code>
+  gives them (LINK-35.1), not over the text About shows.</li>
+<li>It is enough to tell "the same radio" without carrying the serial. Example: the bytes
+  <code>10 32 54 76 98 ba dc fe 01 23 45 67</code> give <code>7f755785</code>.</li>
+<li>Stored for later use (telling which radio a file came from). Nothing reads it yet.</li>
+</ul>
+<h2 id="the-parts">The parts</h2>
+<p>Channels, settings and APRS are the JSON Console has always written as single-part backups; the other parts take
+the same shape. All of them start with the same fields:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>format</code></td>
+<td>string</td>
+<td>The part: <code>ferrite-console-channels</code>, <code>-presets</code>, <code>-settings</code>, <code>-aprs</code>, <code>-contacts</code>, <code>-quick</code>, <code>-waypoints</code> or <code>-dtmf</code>.</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>integer</td>
+<td>The part's own version: 2 for <code>channels.json</code>, 1 for the others. A newer one is refused for that part alone.</td>
+</tr>
+<tr>
+<td><code>saved</code></td>
+<td>string, ISO 8601 UTC</td>
+<td>When the part was saved.</td>
+</tr>
+<tr>
+<td><code>radio</code></td>
+<td>object of strings</td>
+<td>What Console knew: <code>connection</code> (how it was connected), <code>firmware</code>, <code>callsign</code>. Any may be missing. The older single-part files also have <code>uid</code>; a codeplug never does.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The record parts store the radio's own record bytes as hex: lowercase, two digits a byte. They are the same records
+the link protocol carries (manual Appendix G). The readable fields beside them are for people; Console loads the
+records.</p>
+<p>All numbers in the records are little-endian.</p>
+<h3 id="channelsjson">channels.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zones</code></td>
+<td>array</td>
+<td>One entry per zone, numbered 1 up with no gaps (0 to 512 zones).</td>
+</tr>
+<tr>
+<td><code>zones[].number</code></td>
+<td>integer, 1-512</td>
+<td>The zone's number. Sets the order.</td>
+</tr>
+<tr>
+<td><code>zones[].name</code></td>
+<td>string</td>
+<td>For reading; the record's name is the one loaded.</td>
+</tr>
+<tr>
+<td><code>zones[].record</code></td>
+<td>hex string, 26 bytes</td>
+<td>The zone record, below.</td>
+</tr>
+<tr>
+<td><code>channels</code></td>
+<td>array</td>
+<td>One entry per channel in use (0 to 4000).</td>
+</tr>
+<tr>
+<td><code>channels[].number</code></td>
+<td>integer, 1-4000</td>
+<td>For reading; the record holds the number.</td>
+</tr>
+<tr>
+<td><code>channels[].name</code></td>
+<td>string</td>
+<td>For reading.</td>
+</tr>
+<tr>
+<td><code>channels[].record</code></td>
+<td>hex string, 41 bytes (40 accepted)</td>
+<td>The channel record, below.</td>
+</tr>
+<tr>
+<td><code>channels[].pos</code></td>
+<td>array of 2 numbers, optional</td>
+<td>The channel's position (CHAN-2): <code>[latitude, longitude]</code> in degrees, north and east positive, up to seven decimals (the radio keeps 1e-7 degree). Left out when the channel has none.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Zone record (26 bytes):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Bytes</th>
+<th>Type</th>
+<th>Field</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-15</td>
+<td>16 bytes</td>
+<td>Name</td>
+<td>1-16 printable ASCII characters, 0-padded</td>
+</tr>
+<tr>
+<td>16</td>
+<td>u8</td>
+<td>Scan all</td>
+<td>0 no, 1 in the "scan all" set</td>
+</tr>
+<tr>
+<td>17</td>
+<td>u8</td>
+<td>Shown</td>
+<td>1 shown in ◀▶ on home (CHAN-11)</td>
+</tr>
+<tr>
+<td>18</td>
+<td>u8</td>
+<td>By distance</td>
+<td>0 or 1</td>
+</tr>
+<tr>
+<td>19</td>
+<td>u8</td>
+<td>Resume</td>
+<td>0 the radio's rule, 1-10 seconds, 11 carrier drop, 12 stop on hit (SCAN-5)</td>
+</tr>
+<tr>
+<td>20</td>
+<td>u8</td>
+<td>Dwell</td>
+<td>1-254 seconds, 255 the radio's</td>
+</tr>
+<tr>
+<td>21</td>
+<td>u8</td>
+<td>Reserved</td>
+<td>0</td>
+</tr>
+<tr>
+<td>22-23</td>
+<td>u16</td>
+<td>Priority channel 1</td>
+<td>Channel number minus 1 (0-3999); 0xFFFF none</td>
+</tr>
+<tr>
+<td>24-25</td>
+<td>u16</td>
+<td>Priority channel 2</td>
+<td>As priority 1</td>
+</tr>
+</tbody>
+</table></div>
+<p>Channel record (41 bytes; link protocol 3):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Bytes</th>
+<th>Type</th>
+<th>Field</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-1</td>
+<td>u16</td>
+<td>Number</td>
+<td>Channel number minus 1 (0-3999)</td>
+</tr>
+<tr>
+<td>2-3</td>
+<td>u16</td>
+<td>Zone</td>
+<td>Zone number minus 1 (0-511); 0xFFFF no zone</td>
+</tr>
+<tr>
+<td>4-7</td>
+<td>u32</td>
+<td>RX frequency</td>
+<td>10 Hz units (146.520 MHz is 14652000)</td>
+</tr>
+<tr>
+<td>8-23</td>
+<td>16 bytes</td>
+<td>Name</td>
+<td>Printable ASCII, 0-padded; outside the name set written as <code>-</code> (CHAN-31)</td>
+</tr>
+<tr>
+<td>24</td>
+<td>u8</td>
+<td>Mode</td>
+<td>0 FM, 1 NFM, 2 AM</td>
+</tr>
+<tr>
+<td>25</td>
+<td>u8</td>
+<td>Narrow</td>
+<td>Follows the mode: 1 for NFM, else 0</td>
+</tr>
+<tr>
+<td>26-27</td>
+<td>u16</td>
+<td>RX tone</td>
+<td>0 none; CTCSS in 0.1 Hz (1000 is 100.0 Hz); DCS: bit 15 set, bit 14 inverted, the code's octal digits as a number (D023 is 0o23)</td>
+</tr>
+<tr>
+<td>28-29</td>
+<td>u16</td>
+<td>TX tone</td>
+<td>As the RX tone</td>
+</tr>
+<tr>
+<td>30-33</td>
+<td>i32</td>
+<td>Offset</td>
+<td>10 Hz units, signed; 0 simplex. With split: the TX frequency itself</td>
+</tr>
+<tr>
+<td>34</td>
+<td>u8</td>
+<td>Power</td>
+<td>0 low, 1 mid, 2 high</td>
+</tr>
+<tr>
+<td>35</td>
+<td>u8</td>
+<td>Step</td>
+<td>Index: 10 Hz, 50 Hz, 100 Hz, 500 Hz, 1 kHz, 2.5, 5, 6.25, 8.33, 10, 12.5, 25, 50, 100 kHz (0-13)</td>
+</tr>
+<tr>
+<td>36</td>
+<td>u8</td>
+<td>Squelch</td>
+<td>0-9 a level, 10 Global (the slot's own, SQL-6)</td>
+</tr>
+<tr>
+<td>37</td>
+<td>u8</td>
+<td>Busy lockout</td>
+<td>0 off, 1 on (TX-21)</td>
+</tr>
+<tr>
+<td>38</td>
+<td>u8</td>
+<td>Reverse and split</td>
+<td>Bit 0 reverse, bit 1 split</td>
+</tr>
+<tr>
+<td>39</td>
+<td>u8</td>
+<td>Flags</td>
+<td>1 skip, 2 APRS, 4 RX only, 0x40 hidden, 0x80 priority; other bits kept as read</td>
+</tr>
+<tr>
+<td>40</td>
+<td>u8</td>
+<td>End tone and tail</td>
+<td>Bits 0-2 end tone (0 Global, 1 Off, 2 Beep, 3 Two-tone up, 4 Two-tone down, 5 Chirp, 6 Quindar); bits 3-4 tail elimination (0 Global, 1 Off, 2 On). Left off (40 bytes): Global</td>
+</tr>
+</tbody>
+</table></div>
+<p>The radio checks every record as its own editor would (band, tones, name). Console runs the same checks before it
+writes.</p>
+<p>A zone holds at most 256 channels (CHAN-35). A file may hold more (one from before November 1, 2026: the radio had
+no limit then); opening it splits each long zone as the radio's own update does: the first 256 by number stay, the
+rest go 256 at a time to new zones named " 2", " 3" and so on (a copy of the zone's settings, cut to 16 characters).
+The notice says so, and Undo puts it back.</p>
+<p>A position isn't part of the channel record: the link reads and writes it on its own (LINK-53), so it sits beside
+the record. Console writes it only to a radio whose <code>HELLO</code> says it can store positions (caps 64); an older radio
+keeps the channel without it.</p>
+<p><code>pos</code> came in October 30, 2026 without a version bump: it is an optional field, and an older Console ignores it (it
+loads the channels without their positions and never sends positions). A file without <code>pos</code> loads as before.</p>
+<h3 id="presetsjson">presets.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>presets</code></td>
+<td>array, at most 16</td>
+<td>The range presets in the radio's order (MENU 0 1 4).</td>
+</tr>
+<tr>
+<td><code>presets[].number</code></td>
+<td>integer, 1-16</td>
+<td>For reading: the order is the array's.</td>
+</tr>
+<tr>
+<td><code>presets[].name</code>, <code>low</code>, <code>high</code>, <code>step</code>, <code>mode</code>, <code>resume</code></td>
+<td>strings</td>
+<td>For reading: the name, the range in MHz, and the step, mode and resume as the radio words them.</td>
+</tr>
+<tr>
+<td><code>presets[].record</code></td>
+<td>hex string, 24 bytes</td>
+<td>The preset record, below.</td>
+</tr>
+<tr>
+<td><code>presets[].skips</code></td>
+<td>array of strings, at most 48</td>
+<td>The skipped frequencies in MHz (<code>"144.39000"</code>), in the radio's order (SCAN-10, LINK-58). Left out when there are none.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Preset record (24 bytes; LINK-21's what 4, as the link reads and writes it):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Bytes</th>
+<th>Type</th>
+<th>Field</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-11</td>
+<td>12 bytes</td>
+<td>Name</td>
+<td>0-12 printable ASCII characters, 0-padded</td>
+</tr>
+<tr>
+<td>12-15</td>
+<td>u32</td>
+<td>Start</td>
+<td>10 Hz units, 18 to 1300 MHz</td>
+</tr>
+<tr>
+<td>16-19</td>
+<td>u32</td>
+<td>End</td>
+<td>10 Hz units, above the start, up to 1300 MHz; not across 18 or 64 MHz (SCAN-14)</td>
+</tr>
+<tr>
+<td>20</td>
+<td>u8</td>
+<td>Step</td>
+<td>Index into the radio's steps: 0 10 Hz ... 10 12.5 kHz, 11 25 kHz, 12 50 kHz, 13 100 kHz</td>
+</tr>
+<tr>
+<td>21</td>
+<td>u8</td>
+<td>Mode</td>
+<td>0 FM, 1 NFM, 2 AM</td>
+</tr>
+<tr>
+<td>22</td>
+<td>u8</td>
+<td>Narrow</td>
+<td>1 for NFM (VFO-20: the mode carries the bandwidth)</td>
+</tr>
+<tr>
+<td>23</td>
+<td>u8</td>
+<td>Resume</td>
+<td>0 Global (MENU 0 1 2's rule), 1-10 s, 11 carrier drop, 12 stop on hit (SCAN-24)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A preset's skipped frequencies (SCAN-10, up to 48) aren't in its record: the radio keeps them beside it and the link
+reads and writes them as a list of their own (LINK-58, <code>what</code> 11). In the file they are <code>skips</code>. Each lies within its
+preset's range, once. Opening a file puts each preset in the place of the radio's preset with the same number; Write
+sends the skip lists after the presets, to a radio whose firmware takes them (HELLO's second capability byte). An
+older radio keeps its own, and the file's stay in Console.</p>
+<p><code>presets.json</code> came in October 30, 2026 without a version bump: it is a new part, and an older Console skips it.
+<code>skips</code> came the same day, also without one: an optional field, which an older Console ignores (it loads the presets
+without their lists).</p>
+<h3 id="settingsjson">settings.json</h3>
+<p>The PIN and the PIN lock never go in a codeplug; the radio keeps its own.</p>
+<ul>
+<li>Left out entirely: MENU 0 9 3 (PIN lock, channel-only mode, Change PIN) is in neither <code>extras</code> nor <code>settings</code>.</li>
+<li>In <code>record</code>, the PIN lock's fields (its mode, the PIN, its length, the wrong-PIN counters, channel-only mode) are
+  cleared to their defaults. No other key names them.</li>
+<li>On Open, and again just before Write, Console puts the radio's own PIN lock back into the record. The radio also
+  keeps its PIN lock on every settings write (LINK-7).</li>
+</ul>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>record</code></td>
+<td>hex string</td>
+<td>The settings record: ferrite-app's <code>Settings</code> fields in order (<code>persist.rs</code>), then the power-on message. Its length is the firmware's (<code>INFO</code>'s settings length; 414 bytes today, always under 512). A record of another length is shown but never written (LINK-21). The PIN lock's fields cleared (above).</td>
+</tr>
+<tr>
+<td><code>extras</code></td>
+<td>object, string to string</td>
+<td>The settings the settings record doesn't carry, Watch, Battery Save and the message sound (since decision 347, from the radio record, LINK-66): the menu number (<code>"0 7 7 1"</code>) to the value as the menu shows it (<code>"Level 1"</code>). May be empty.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td>object, string to string</td>
+<td>Every setting as the radio's menu shows it, <code>"0 1 2 Resume": "5 s"</code>. For reading only; ignored when opened.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="aprsjson">aprs.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>record</code></td>
+<td>hex string, 72 bytes</td>
+<td>The APRS record, below.</td>
+</tr>
+<tr>
+<td><code>extras</code></td>
+<td>object, string to string</td>
+<td>Empty since decision 347 (every MENU 0 5 value is in the record); a file from before it may list some; they are ignored (the record holds them).</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td>object, string to string</td>
+<td>MENU 0 5 as the menu shows it. For reading only.</td>
+</tr>
+</tbody>
+</table></div>
+<p>APRS record (72 bytes; LINK-43, Appendix G; 25 or 24 before decision 347):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Bytes</th>
+<th>Type</th>
+<th>Field</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-1</td>
+<td>u16</td>
+<td>Frequency</td>
+<td>5 kHz units; 0 the region's</td>
+</tr>
+<tr>
+<td>2</td>
+<td>u8</td>
+<td>Beacon</td>
+<td>0 off, 1 manual, 2-9 every 1, 2, 5, 10, 15, 20, 30, 60 min, 10-16 every 0.1, 0.2, 0.5, 1, 2, 5, 10 km, 17 smart; bit 7 paused</td>
+</tr>
+<tr>
+<td>3</td>
+<td>u8</td>
+<td>Power</td>
+<td>0 low, 1 mid, 2 high</td>
+</tr>
+<tr>
+<td>4</td>
+<td>u8</td>
+<td>Path</td>
+<td>0 none, 1 WIDE1-1, 2 WIDE1-1,WIDE2-1, 3 custom</td>
+</tr>
+<tr>
+<td>5</td>
+<td>u8</td>
+<td>Digipeater</td>
+<td>Bit 0 on, bit 1 my callsign too, bits 4-6 the wait (0-5 s)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>u8</td>
+<td>Beacon after voice</td>
+<td>0 or 1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>u8</td>
+<td>SSID</td>
+<td>0-15</td>
+</tr>
+<tr>
+<td>8-23</td>
+<td>16 bytes</td>
+<td>Custom path</td>
+<td>ASCII, 0-padded</td>
+</tr>
+<tr>
+<td>24</td>
+<td>u8</td>
+<td>FX.25 on transmit</td>
+<td>0 off, 16, 32, 64 check bytes (APRS-45). Left off (24 bytes): the radio's setting is kept</td>
+</tr>
+<tr>
+<td>25</td>
+<td>u8</td>
+<td>Message sound</td>
+<td>0 7 5 5, an index into the chimes (0 off; APRS-6.1)</td>
+</tr>
+<tr>
+<td>26</td>
+<td>u8</td>
+<td>Symbol</td>
+<td>An index into the symbols (APRS-47)</td>
+</tr>
+<tr>
+<td>27</td>
+<td>u8</td>
+<td>TX delay</td>
+<td>10-100, in 10 ms (APRS-48)</td>
+</tr>
+<tr>
+<td>28</td>
+<td>u8</td>
+<td>TX level</td>
+<td>0 low, 1 mid, 2 high (APRS-49)</td>
+</tr>
+<tr>
+<td>29-68</td>
+<td>40 bytes</td>
+<td>Comment</td>
+<td>Printable ASCII, 0-padded (APRS-50)</td>
+</tr>
+<tr>
+<td>69</td>
+<td>u8</td>
+<td>Ambiguity</td>
+<td>0 exact to 4 digits dropped (APRS-51)</td>
+</tr>
+<tr>
+<td>70</td>
+<td>u8</td>
+<td>Mic-E</td>
+<td>0 off, 1-7 the status (APRS-52)</td>
+</tr>
+<tr>
+<td>71</td>
+<td>u8</td>
+<td>Telemetry</td>
+<td>0 or 1 (APRS-54)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="contactsjson">contacts.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contacts</code></td>
+<td>array, at most 1016</td>
+<td>The address book, in callsign order (APRS-37).</td>
+</tr>
+<tr>
+<td><code>contacts[].call</code></td>
+<td>string</td>
+<td>3-9 characters: <code>A-Z</code>, <code>0-9</code>, <code>-</code> (<code>VE7ABC-9</code>).</td>
+</tr>
+<tr>
+<td><code>contacts[].name</code></td>
+<td>string</td>
+<td>Up to 12 characters: letters, digits, space and <code>- . / _ # + &amp; ( ) ' !</code>. Others become <code>-</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Contacts aren't one record: Console writes them by callsign. Opening a file adds or renames those contacts on Write;
+it deletes none.</p>
+<h3 id="quickjson">quick.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>messages</code></td>
+<td>array of 9</td>
+<td>The quick messages compose offers, in order (TEXT-7, LINK-54).</td>
+</tr>
+<tr>
+<td><code>messages[].own</code></td>
+<td>boolean</td>
+<td>The owner's own text; <code>false</code> is the factory text.</td>
+</tr>
+<tr>
+<td><code>messages[].text</code></td>
+<td>string</td>
+<td>The text the radio uses: the owner's, or (for reading) the factory one. Up to 67 printable characters, none of <code>\|</code>, <code>~</code>, <code>{</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Opening a file sets each message as it says: the owner's text, or back to the factory text.</p>
+<h3 id="waypointsjson">waypoints.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>waypoints</code></td>
+<td>array, at most 2032</td>
+<td>The waypoints, newest first, as the radio lists them (GPS-10, LINK-55).</td>
+</tr>
+<tr>
+<td><code>waypoints[].name</code></td>
+<td>string</td>
+<td>1-16 printable characters.</td>
+</tr>
+<tr>
+<td><code>waypoints[].lat</code>, <code>lon</code></td>
+<td>numbers</td>
+<td>Degrees, north and east positive, to 1e-7 (the radio's unit).</td>
+</tr>
+<tr>
+<td><code>waypoints[].source</code></td>
+<td>string</td>
+<td><code>marked</code> (on the radio), <code>aprs</code> (from a station), <code>link</code> (from Console) or <code>grid</code> (a grid square).</td>
+</tr>
+</tbody>
+</table></div>
+<p>Opening a file makes the radio's list this one on Write: the waypoints it already has are kept, the others deleted,
+the new ones added.</p>
+<h3 id="dtmfjson">dtmf.json</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>memories</code></td>
+<td>array, at most 16</td>
+<td>The DTMF memories that are set (DTMF-12, LINK-56).</td>
+</tr>
+<tr>
+<td><code>memories[].number</code></td>
+<td>integer, 1-16</td>
+<td>The memory's number; each once.</td>
+</tr>
+<tr>
+<td><code>memories[].symbols</code></td>
+<td>string</td>
+<td>1-16 of <code>0-9</code>, <code>A-D</code>, <code>*</code>, <code>#</code>.</td>
+</tr>
+<tr>
+<td><code>memories[].name</code></td>
+<td>string</td>
+<td>Up to 10 printable characters; may be empty.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Opening a file makes the radio's memories these on Write: the numbers it leaves out are cleared.</p>
+<p><code>quick.json</code>, <code>waypoints.json</code> and <code>dtmf.json</code> came in October 30, 2026 without a version bump: new parts, which an
+older Console skips.</p>
+<h2 id="opening-a-file">Opening a file</h2>
+<ul>
+<li>Each part goes into its page as unwritten changes. Settings keep the radio's own PIN lock. Write to radio, page by page, puts it on the radio, after a
+  backup and a diff.</li>
+<li>One notice lists what was loaded: "Loaded channels (3) and zones (2), range presets (2), APRS settings, contacts (2),
+  quick messages (1 your own), waypoints (2), DTMF memories (2) from VA7IF-20261030-1412.ferrite".</li>
+<li>A part that doesn't load (a newer part version, a bad record) is named in the notice. The others still load.</li>
+<li>Refused with a message, nothing loaded:</li>
+<li>not a zip, or a damaged one (a CRC mismatch, cut short);</li>
+<li>a zip without <code>manifest.json</code>, or with another <code>format</code>: "not a Ferrite codeplug";</li>
+<li>a newer <code>version</code>: "a newer codeplug (format version 3) than this Console reads (version 2): update Ferrite Console";</li>
+<li>a part listed but missing: "damaged codeplug".</li>
+</ul>
+<h2 id="older-files-backupjson">Older files: <code>-backup.json</code></h2>
+<p>Before October 30, 2026, Console saved each page's part on its own. Open… still takes them:</p>
+<ul>
+<li><code>ferrite-&lt;who&gt;-&lt;date&gt;-backup.json</code>, <code>-table.json</code>: channels and zones.</li>
+<li><code>…-settings-backup.json</code>, <code>-settings-edited.json</code>: Radio Settings.</li>
+<li><code>…-aprs-backup.json</code>, <code>-aprs-edited.json</code>: APRS settings.</li>
+<li><code>…-presets.json</code>: range presets (saved beside the channels' backup before each write, from October 30, 2026).</li>
+<li><code>…-quick-backup.json</code>, <code>-waypoints-backup.json</code>, <code>-dtmf-backup.json</code>: the lists, saved before each of their writes.</li>
+</ul>
+<p>Each is exactly one part's JSON, as above. Console tells them apart by <code>format</code>, not by name, and loads just that part.
+The backup Console saves before each write is still one of these files.</p>
+<h2 id="older-files-version-1">Older files: version 1</h2>
+<p>Format version 1 (October 2026, link protocol 2) is the same zip and the same parts, except <code>channels.json</code>
+(part version 1): its channel records are 40 bytes (39 accepted), the zone one byte at 2 (zone number minus 1,
+0-253; 255 no zone), everything after it one byte earlier. Console reads them by widening the zone to two bytes
+(255 to 0xFFFF) and writes version 2. The limits were then 1,000 channels, 254 zones, 128 contacts and 256 waypoints.</p>
+<h2 id="changing-the-format">Changing the format</h2>
+<ul>
+<li><code>version</code> starts at 1. Console reads any version up to its own, and refuses a newer one.</li>
+<li>Bump <code>version</code> when an older Console would misread a newer file:</li>
+<li>a part or manifest field renamed, removed or changed in meaning;</li>
+<li>a change to the zip itself (a new compression method, folders).</li>
+<li>Don't bump it for what an older Console can safely ignore:</li>
+<li>a new part (older readers skip it);</li>
+<li>a new optional field in the manifest or a part.</li>
+<li>A part's own layout changes with its own <code>version</code>. An older Console then refuses that part alone.</li>
+<li>A record layout follows the firmware. A record of the wrong length is refused or shown read-only, never written.</li>
+<li>Writers always write the newest version they know.</li>
+<li>Change this document with the code and the example fixture. Console's tests fail until all three agree (the doc's
+  check runs when the docs checkout is beside Console's).</li>
+</ul>
+<h2 id="example">Example</h2>
+<p><code>VA7IF-20261030-1412.ferrite</code>, saved before Radio Settings was read (no <code>settings.json</code>). Eight entries.
+To write the fixtures again from Console's code: <code>FERRITE_WRITE_CODEPLUG_EXAMPLE=1 cargo test -p ferrite-console-core
+codeplug_example</code>.</p>
+<p><code>manifest.json</code>:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-codeplug&quot;,
+  &quot;version&quot;: 2,
+  &quot;created&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;console&quot;: &quot;0.1.0&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;,
+    &quot;build&quot;: &quot;tx&quot;
+  },
+  &quot;radio_fingerprint&quot;: &quot;7f755785&quot;,
+  &quot;parts&quot;: [
+    &quot;channels&quot;,
+    &quot;presets&quot;,
+    &quot;aprs&quot;,
+    &quot;contacts&quot;,
+    &quot;quick&quot;,
+    &quot;waypoints&quot;,
+    &quot;dtmf&quot;
+  ]
+}
+</code></pre>
+<p><code>channels.json</code>: zones Local (scan all) and Repeaters (resume on carrier drop, priority channel 10); channel 1
+(146.520 NFM, zone Local), channel 10 (146.940, -0.6 MHz, TX tone 100.0, mid power, zone Repeaters, at 49.35 N
+123.07 W), channel 20 (446.000, no zone, skipped):</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-channels&quot;,
+  &quot;version&quot;: 2,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;zones&quot;: [
+    {
+      &quot;number&quot;: 1,
+      &quot;name&quot;: &quot;Local&quot;,
+      &quot;record&quot;: &quot;4c6f63616c000000000000000000000001010000ff00ffffffff&quot;
+    },
+    {
+      &quot;number&quot;: 2,
+      &quot;name&quot;: &quot;Repeaters&quot;,
+      &quot;record&quot;: &quot;526570656174657273000000000000000001000bff000900ffff&quot;
+    }
+  ],
+  &quot;channels&quot;: [
+    {
+      &quot;number&quot;: 1,
+      &quot;name&quot;: &quot;Calling 2 m&quot;,
+      &quot;record&quot;: &quot;000000006092df0043616c6c696e672032206d000000000001010000000000000000000a0a00000000&quot;
+    },
+    {
+      &quot;number&quot;: 10,
+      &quot;name&quot;: &quot;North hill&quot;,
+      &quot;record&quot;: &quot;090001007036e0004e6f7274682068696c6c00000000000001010000e803a015ffff010a0a00000000&quot;,
+      &quot;pos&quot;: [
+        49.35,
+        -123.07
+      ]
+    },
+    {
+      &quot;number&quot;: 20,
+      &quot;name&quot;: &quot;Calling 70 cm&quot;,
+      &quot;record&quot;: &quot;1300ffffc08aa80243616c6c696e6720373020636d00000001010000000000000000000a0a00000100&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>presets.json</code>: 2 m (144-148 MHz, 12.5 kHz steps, NFM, skipping 144.39 and 145.8 MHz) and the airband (118-137 MHz, 25 kHz steps, AM, resuming
+after 3 s):</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-presets&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;presets&quot;: [
+    {
+      &quot;number&quot;: 1,
+      &quot;name&quot;: &quot;2 m&quot;,
+      &quot;low&quot;: &quot;144.00000&quot;,
+      &quot;high&quot;: &quot;148.00000&quot;,
+      &quot;step&quot;: &quot;12.5 kHz&quot;,
+      &quot;mode&quot;: &quot;NFM&quot;,
+      &quot;resume&quot;: &quot;Global&quot;,
+      &quot;record&quot;: &quot;32206d00000000000000000000badb0080d4e1000a010100&quot;,
+      &quot;skips&quot;: [
+        &quot;144.39000&quot;,
+        &quot;145.80000&quot;
+      ]
+    },
+    {
+      &quot;number&quot;: 2,
+      &quot;name&quot;: &quot;Airband&quot;,
+      &quot;low&quot;: &quot;118.00000&quot;,
+      &quot;high&quot;: &quot;137.00000&quot;,
+      &quot;step&quot;: &quot;25 kHz&quot;,
+      &quot;mode&quot;: &quot;AM&quot;,
+      &quot;resume&quot;: &quot;After 3 s&quot;,
+      &quot;record&quot;: &quot;41697262616e640000000000c00db400a00bd1000b020003&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>aprs.json</code>: the radio's defaults:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-aprs&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;record&quot;: &quot;0000000002000007000000000000000000000000000000001003001e0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000&quot;,
+  &quot;extras&quot;: {},
+  &quot;settings&quot;: {
+    &quot;0 5 4 Frequency&quot;: &quot;144.390&quot;,
+    &quot;0 5 5 1 SSID&quot;: &quot;7 Handheld&quot;,
+    &quot;0 5 5 2 Symbol&quot;: &quot;Person&quot;,
+    &quot;0 5 5 3 Comment&quot;: &quot;Empty&quot;,
+    &quot;0 5 5 6 Ambiguity&quot;: &quot;Exact&quot;,
+    &quot;0 5 5 7 Mic-E&quot;: &quot;Off&quot;,
+    &quot;0 5 6 1 Mode&quot;: &quot;Off&quot;,
+    &quot;0 5 6 2 After voice TX&quot;: &quot;Off&quot;,
+    &quot;0 5 6 3 Power&quot;: &quot;Low&quot;,
+    &quot;0 5 6 4 Telemetry&quot;: &quot;Off&quot;,
+    &quot;0 5 7 1 Digipeat&quot;: &quot;Off&quot;,
+    &quot;0 5 7 2 Aliases&quot;: &quot;WIDE1-1&quot;,
+    &quot;0 5 7 3 Wait&quot;: &quot;0 s&quot;,
+    &quot;0 5 9 1 Path&quot;: &quot;WIDE1-1,WIDE2-1&quot;,
+    &quot;0 5 9 2 Custom path&quot;: &quot;None&quot;,
+    &quot;0 5 9 3 TX delay&quot;: &quot;300 ms&quot;,
+    &quot;0 5 9 4 TX level&quot;: &quot;Mid&quot;,
+    &quot;0 5 9 5 FX.25 on TX&quot;: &quot;16 bytes&quot;
+  }
+}
+</code></pre>
+<p><code>contacts.json</code>:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-contacts&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;contacts&quot;: [
+    {
+      &quot;call&quot;: &quot;VA7XYZ-9&quot;,
+      &quot;name&quot;: &quot;Sam mobile&quot;
+    },
+    {
+      &quot;call&quot;: &quot;VE7ABC&quot;,
+      &quot;name&quot;: &quot;Club station&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>quick.json</code>: the factory texts, the third the owner's own:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-quick&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;messages&quot;: [
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;73&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;QSL, thanks&quot;
+    },
+    {
+      &quot;own&quot;: true,
+      &quot;text&quot;: &quot;At the club tonight, 146.94&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;Call me&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;Where are you?&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;QRT for now&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;Yes&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;No&quot;
+    },
+    {
+      &quot;own&quot;: false,
+      &quot;text&quot;: &quot;Are you on the repeater?&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>waypoints.json</code>: two, the newest first:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-waypoints&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;waypoints&quot;: [
+    {
+      &quot;name&quot;: &quot;Grouse summit&quot;,
+      &quot;lat&quot;: 49.3802,
+      &quot;lon&quot;: -123.0811,
+      &quot;source&quot;: &quot;marked&quot;
+    },
+    {
+      &quot;name&quot;: &quot;Club shack&quot;,
+      &quot;lat&quot;: 49.2827,
+      &quot;lon&quot;: -123.1207,
+      &quot;source&quot;: &quot;link&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>dtmf.json</code>: memories 1 and 2, a repeater link's on and off:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;ferrite-console-dtmf&quot;,
+  &quot;version&quot;: 1,
+  &quot;saved&quot;: &quot;2026-10-30T21:12:00.000Z&quot;,
+  &quot;radio&quot;: {
+    &quot;callsign&quot;: &quot;VA7IF&quot;,
+    &quot;connection&quot;: &quot;Cable&quot;,
+    &quot;firmware&quot;: &quot;0.8.2&quot;
+  },
+  &quot;memories&quot;: [
+    {
+      &quot;number&quot;: 1,
+      &quot;symbols&quot;: &quot;*79#&quot;,
+      &quot;name&quot;: &quot;Link on&quot;
+    },
+    {
+      &quot;number&quot;: 2,
+      &quot;symbols&quot;: &quot;#79#&quot;,
+      &quot;name&quot;: &quot;Link off&quot;
+    }
+  ]
+}
+</code></pre><p class="gen"><small>Made from <code>docs/dev/codeplug-format.md</code> by docs/tools/mkdev.py.</small></p>
+</div>
+</div>
+{% endraw %}

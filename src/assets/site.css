@@ -259,3 +259,10 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 .download .keybox { margin: 12px 0 10px; }
 .download pre { margin-bottom: 0; }
 .column .prose h3 { font-size: 19px; margin: 32px 0 8px; }
+
+/* The developer pages' menu (ferritefw.dev/dev/, docs/tools/mkdev.py). */
+.devnav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 28px; padding-bottom: 14px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.devnav a { color: var(--sub); text-decoration: none; }
+.devnav a:hover, .devnav a.on { color: var(--blue); }
+.devnav a.on { font-weight: 600; }
+.prose p.gen { margin-top: 36px; color: var(--dim); }

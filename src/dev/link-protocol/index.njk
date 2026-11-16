@@ -1,0 +1,1510 @@
+---
+layout: layouts/base.njk
+title: "Link protocol · Developers"
+description: "The binary protocol between the radio and a PC, on the cable and over Bluetooth."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>Link protocol</h1><p class="lead">The binary protocol between the radio and a PC, on the cable and over Bluetooth.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/">Overview</a> <a href="/dev/building/">Building</a> <a href="/dev/link-protocol/" class=on aria-current=page>Link protocol</a> <a href="/dev/update-file/">Update file</a> <a href="/dev/codeplug/">Codeplug format</a> <a href="/dev/terminal-pages/">Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>The binary protocol between the radio and a PC (Ferrite Console, <code>ferrite_link.py</code>), on the programming cable and over Bluetooth. Its rules are chapter 29 of the manual (LINK-1 and on); this is Appendix G, the wire format.</p>
+<p>The wire format of chapter 29 (LINK-1, LINK-21 – LINK-23), as built Oct 6, 2026; protocol 3 since decision 333 (Nov 1, 2026: 2-byte zone numbers, the zone record's count, <code>USED</code> in parts, the raw data messages and the layouts; LINK-59 – LINK-62). Shared code: <code>ferrite-core</code> <code>link.rs</code>; the radio's side: <code>ferrite-app</code> <code>link.rs</code>; a PC reference: <code>ferrite/tools/ferrite_link.py</code>.</p>
+<p><strong>Frames.</strong> A frame on the wire is its body COBS-encoded, then a 0x00 delimiter (0x00 never appears inside). The body is <code>type</code>, <code>seq</code>, <code>payload</code> (up to 240 bytes), then the CRC-16/CCITT-FALSE (poly 0x1021, initial 0xFFFF) of type, seq and payload, little-endian. The PC sends a 0x00 first to take the cable (TERM-2). On Bluetooth the same bytes go over the BT513's FFE0 service, characteristic FFE1: writes (without response) of at most 20 bytes, paced for the module's 9600-baud UART (about 0.8 KB/s), and the answers as notifications in any chunking; FF31 is never used. The cable and Bluetooth each have their own session (LINK-28); a write while the other port's session is mid-write answers <code>busy</code>. Every request (type 0x01–0x7F) is answered with <code>type | 0x80</code>, the same <code>seq</code>, and a payload that starts with a status byte. Numbers are little-endian.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th></th>
+<th>Status</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>ok</td>
+<td>6</td>
+<td>(not sent since decision 104; kept so the number isn't reused)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>bad frame (COBS, length or CRC; type and seq echo what was readable)</td>
+<td>7</td>
+<td>busy: the store or the radio's own editor; try again shortly</td>
+</tr>
+<tr>
+<td>2</td>
+<td>unknown type</td>
+<td>8</td>
+<td>not found</td>
+</tr>
+<tr>
+<td>3</td>
+<td>bad argument</td>
+<td>9</td>
+<td>invalid: the reason follows as text (LINK-22)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>refused: never over the link</td>
+<td>10</td>
+<td>cancelled: BACK on the progress screen; refused until <code>END</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>not authorised: the radio's PIN lock is on; send <code>AUTH</code> first (LINK-30)</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Request</th>
+<th>Answer after the status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x01 <code>HELLO</code></td>
+<td>protocol (3), 8 reserved bytes (the first's bit 0: compression wanted, LINK-51), client name</td>
+<td>protocol, largest payload, may go on (1) or <code>AUTH</code> first (0), firmware version (length, text), build (u8: 0 receive, 1 tx, 2 the retired tx-dry, 3 tx with Dry TX on (TX-48), plus 0x80 with the bench commands; LINK-35); then a capability byte (1 <code>STREAM</code>, 2 two <code>WRITE_MANY</code> frames in flight, 4 compressed, 8 <code>WRITE_MANY</code> deletes, 16 <code>AUDIO</code>, 32 <code>TEXTS</code>, 64 channel positions (<code>what</code> 7, LINK-53), 128 quick messages, waypoints, DTMF memories and the event log's events (<code>what</code> 8-10, <code>SUBSCRIBE</code> 8: LINK-54 – LINK-57); absent before decision 285: LINK-35.2); then a second capability byte (1 range preset skip lists, <code>what</code> 11: LINK-58; absent before decision 329; 2 the raw data messages and the layouts: LINK-59 – LINK-62; 4 satellites: <code>what</code> 12 and 13 and <code>CLOCK</code>, LINK-63 – LINK-65; 8 the radio record, <code>what</code> 14, and the APRS record with every MENU 0 5 value: LINK-66, decision 347; 16 the line commands: <code>CMD</code> answers, absent from a user build since decision 347); then, with that 2, the layout this firmware stores (u8: 3) and the layout the chip's data is in (u8: 3, or 2 / another version while it waits for Console, UPD-16; 255 from a raw write until the stamp and a restart, or after a move cut before its stamp: half moved, LINK-61, decision 339)</td>
+</tr>
+<tr>
+<td>0x02 <code>INFO</code></td>
+<td>—</td>
+<td>firmware version (length, text), channels (u16), zones (u16; one byte before protocol 3), presets (u8), settings record length (u16), region, callsign (length, text), build (u8, as <code>HELLO</code>'s), the MCU's unique ID (12 bytes, LINK-35.1), then the two layout bytes (as <code>HELLO</code>'s, LINK-62)</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>—</td>
+<td>retired (<code>TOKEN</code>, approval tokens, until decision 104); not reused</td>
+</tr>
+<tr>
+<td>0x04 <code>AUTH</code></td>
+<td>the radio's PIN, ASCII digits (4-6)</td>
+<td>— ; <code>refused</code> if wrong (counted, LINK-31), <code>busy</code> during the 30 s wait; the cable and a radio with no PIN lock always ok</td>
+</tr>
+<tr>
+<td>0x10 <code>READ</code></td>
+<td>what (1 settings, 5 APRS or 14 the radio record: read with <code>READ</code>, the records bigger than a frame or kept apart from the lists; LINK-21, LINK-66), index (u16), offset (u16), length (u8, up to 237)</td>
+<td>record length (u16), the bytes from offset; any other <code>what</code> (channels, zones and presets among them: <code>READ_MANY</code>): <code>bad argument</code></td>
+</tr>
+<tr>
+<td>0x11 <code>WRITE</code></td>
+<td>what (1, 5 or 14, as <code>READ</code>), index (u16), offset (u16), record length (u16), bytes</td>
+<td>— ; the parts come in order and the record is applied when the last arrives; any other <code>what</code> (channels, zones and presets: <code>WRITE_MANY</code>): <code>refused</code> (LINK-3)</td>
+</tr>
+<tr>
+<td>0x12 <code>DELETE</code></td>
+<td>what, index (u16)</td>
+<td>— (channels, zones, presets)</td>
+</tr>
+<tr>
+<td>0x15 <code>USED</code></td>
+<td>what (2 channels, 3 zones, 4 presets, 6 contacts), first index (u16; absent: 0)</td>
+<td>index count (u16: 4000 for channels), the first index answered (u16), then the bitmap from it, index first + i at bit <code>i % 8</code> of byte <code>i / 8</code>, set where a record is, as many as fit (1,880; LINK-39): ask again from first + 1,880 until the count; a first index past the count: <code>bad argument</code>; the settings, and 7-11 (<code>READ_MANY</code> only): <code>bad argument</code></td>
+</tr>
+<tr>
+<td>0x17 <code>READ_MANY</code></td>
+<td>what (2-4, 6-11), first index (u16), count (u16; cut at the last index)</td>
+<td>next (u16: the index to go on from; first + count, cut, when the range is done), then each record held, as many whole ones as fit: index (u16), length (u8), the record (LINK-40). Empty indexes are skipped; a channel (40 bytes) goes five to an answer</td>
+</tr>
+<tr>
+<td>0x18 <code>WRITE_MANY</code></td>
+<td>what (2-4, 6-11), then records as <code>READ_MANY</code> gives them: index (u16), length (u8), the record, to the end of the frame</td>
+<td>applied (u8: how many records were applied), then for <code>invalid</code> the reason; <code>busy</code> (the record open in the radio's editor, LINK-22) and <code>cancelled</code> carry the count too, so the PC goes on from the one refused. A malformed frame: <code>bad argument</code>, nothing applied; refused before the first (<code>busy</code> from the other port, LINK-28; <code>cancelled</code>): no count. Applied one record a pass, so the answer can take a few tens of ms (LINK-41)</td>
+</tr>
+<tr>
+<td>0x19 <code>STREAM</code></td>
+<td>an inner request's type (<code>READ_MANY</code> 0x17, <code>HEARD</code> 0x52, <code>MSGS</code> 0x53, <code>LOG_READ</code> 0x40, <code>UI</code> 0x33) and its payload (LINK-50)</td>
+<td>that request's answers in turn, each its own frame: type <code>STREAM_MORE</code> (0x1A) | 0x80 while more follow, <code>STREAM</code> | 0x80 for the last; seq the request's, then + 1 a frame; each payload as the inner request's answer</td>
+</tr>
+<tr>
+<td>0x7D <code>Z</code></td>
+<td>(LINK-51, while compression is on) the inner request's type, the frame's count PC to radio (u8), the payload coded</td>
+<td>answers and events likewise: type 0xFD (0x7D for an event), the inner type, the count radio to PC, the coded payload</td>
+</tr>
+<tr>
+<td>0x13 <code>BEGIN</code></td>
+<td>records to come (u16)</td>
+<td>— ; the radio shows the progress screen (LINK-9)</td>
+</tr>
+<tr>
+<td>0x14 <code>END</code></td>
+<td>—</td>
+<td>— ; the progress screen closes (a session also ends after 5 s without a frame)</td>
+</tr>
+<tr>
+<td>0x16 <code>SLOT</code></td>
+<td>slot (0–2), then optionally a mask and the fields it names, in this order: 1 frequency (u32, 10 Hz, the VFO's), 2 mode (u8: 0 FM, 1 NFM, 2 AM), 4 power (u8: 0 low, 1 mid, 2 high), 8 RX tone (u16, CHAN-3's tone word), 16 TX tone (u16); 32 to the VFO (V/M) first and 64 make it the active slot, no bytes; 128 the offset: i32 and u8, the signed shift (10 Hz, 0 simplex) and 0, or the split's TX frequency and 1. No mask: a read (LINK-33, TERM-35)</td>
+<td>slot, active (u8), channel (u16, 0-based; 0xFFFF on its VFO), frequency (u32), mode, power, RX tone (u16), TX tone (u16), offset (i32: the shift, or the split's TX frequency), flags (1 split, 2 the APRS slot, 4 scanning): 19 bytes, as it is after; <code>invalid</code> and the reason if refused (nothing changed)</td>
+</tr>
+<tr>
+<td>0x31 <code>CMD</code></td>
+<td>a terminal command line, ASCII (LINK-34, chapter 37)</td>
+<td>more (u8: 1, ask <code>MORE</code> for the rest), then the output as text, whole lines each ending <code>\n</code>; or <code>invalid</code> and the terminal's refusal. A new <code>CMD</code> ends one still running</td>
+</tr>
+<tr>
+<td>0x32 <code>MORE</code></td>
+<td>—</td>
+<td>as <code>CMD</code>'s answer, the next lines; more 1 with no text: still working (a debug command waiting for the firmware), ask again shortly; nothing running: 0 and no text</td>
+</tr>
+<tr>
+<td>0x40 <code>LOG_READ</code></td>
+<td>before (u32: records with a lower sequence number; 0xFFFFFFFF from the newest), optionally the most to send (u8; 0 or absent: as many as fit)</td>
+<td>next sequence number (u32: the newest's + 1), records held (u16), how many follow (u8), then each, newest first (below; LINK-42). Nothing follows (0): no older ones</td>
+</tr>
+<tr>
+<td>0x20 <code>BAUD</code></td>
+<td>rate (u32)</td>
+<td>— ; then both switch; a <code>HELLO</code> at the new rate within 1 s keeps it (LINK-11)</td>
+</tr>
+<tr>
+<td>0x21 <code>REBOOT</code></td>
+<td>—</td>
+<td>— ; then the radio saves, goes quiet and resets into the bootloader (LINK-24); <code>not authorised</code> from Bluetooth before <code>AUTH</code> while a PIN lock is on, <code>busy</code> while transmitting</td>
+</tr>
+<tr>
+<td>0x30 <code>KEY</code></td>
+<td>key (u8), action (u8), then the action's bytes. A keypad or side key (LINK-19) is stock's key code 0–21 (PF1 0, PF2 1, V/M 2, SLOT 3, ◀ 4, ▶ 5, MENU/OK 6, ▲ 7, ▼ 8, BACK 9, 1 10, 2 11, 3 12, * 13, 4 14, 5 15, 6 16, 0 17, 7 18, 8 19, 9 20, # 21), then the action: 0 up, 1 down, 2 short press, 3 long press (held 750 ms). 0x81 the knob (LINK-19): then the steps, i8, + clockwise, 1–20 either way. 0x80 remote PTT (LINK-20): action 1 on, then the slot (0xFF the active slot, 0–2 A–C); 2 keepalive, at least every 2 s; 0 off. Any other key (the PTT codes 24–26 too) or a malformed one: <code>bad argument</code></td>
+<td>a key or the knob: — ; <code>busy</code> while a long press is held or the store writes (send it again), <code>invalid</code> and the reason while the radio transmits; on: the slot keyed (u8), or <code>invalid</code> and the reason; keepalive: — while keyed, else <code>invalid</code> and why it ended ("ended: no keepalive for 2 s", "ended: PTT pressed on the radio", ...), or "keyed from the other port" when the other port's session keyed (LINK-28: on too); off: — , always <code>ok</code>, from either port. Sent without waiting for earlier <code>KEY</code> answers: on the cable they leave only after the unkey (TX-43)</td>
+</tr>
+<tr>
+<td>0x33 <code>UI</code></td>
+<td>optionally a byte: 0 (or nothing) what the screen shows, 1 the key names, 2 the compact status (LINK-19)</td>
+<td>as <code>CMD</code>'s answer: more (u8), then text lines, <code>MORE</code> for the rest; the terminal's <code>ui</code> / <code>ui keys</code> / <code>ui status</code> text (2: one line, more 0)</td>
+</tr>
+<tr>
+<td>0x50 <code>SUBSCRIBE</code></td>
+<td>mask (u8: 1 stations heard, 2 messages, 4 Live View, 8 the event log (LINK-57, from radios whose <code>HELLO</code> says 128); 0 ends), optionally the UI's least gap (u8, 100 ms units; 0 or absent: 5 on Bluetooth, 2 on the cable), flags (u8: 1 renew: keep the subscription as it is, a keepalive; LINK-46)</td>
+<td>mask, the Live View dictionary's version (u8: 1). A mask with 4 and no renew starts Live View over with the whole state</td>
+</tr>
+<tr>
+<td>0x51 <code>EVENT</code></td>
+<td>never sent by the PC (answered <code>unknown type</code>)</td>
+<td>radio to PC, unasked: a frame of type 0x51 itself (the radio sends no requests, so a type below 0x80 from it is always an event), seq the session's event counter, the payload a kind (u8) and its bytes, no status byte (below; LINK-46)</td>
+</tr>
+<tr>
+<td>0x52 <code>HEARD</code></td>
+<td>first index (u8; absent: 0)</td>
+<td>count (u8), then stations from that index, as many whole ones as fit (below; LINK-44)</td>
+</tr>
+<tr>
+<td>0x53 <code>MSGS</code></td>
+<td>first index (u16; absent: 0)</td>
+<td>count (u16), then messages from that index, newest first, as many whole ones as fit (below; LINK-44)</td>
+</tr>
+<tr>
+<td>0x54 <code>MSG_SEND</code></td>
+<td>to (length, text: 1-9 capitals, digits, <code>-</code>), text (length, text: 1-67 printable, no vertical bar, tilde or open brace)</td>
+<td>APRS mode on (u8: 1 it goes at the next turn, 0 it waits for APRS mode); <code>invalid</code> and why: a receive-only build, no callsign, a bad address or text; <code>busy</code>: the queue is full (LINK-45)</td>
+</tr>
+<tr>
+<td>0x61 <code>DATA_READ</code></td>
+<td>op (u8), then: 0 <code>READ</code> address (u32), length (u8, 1-232); 1 <code>CRC</code> address (u32), length (u32)</td>
+<td><code>READ</code>: the bytes; <code>CRC</code>: the CRC-32 (u32; CRC-32/ISO-HDLC: reflected, poly 0xEDB88320, init and final XOR 0xFFFFFFFF, as the layout header's). A range touching calibration (0x00F000-0x00FFFF) or reaching 0x300000: <code>refused</code>; length 0 or over 232, another op or shape: <code>bad argument</code>; <code>busy</code> while the store has writes to make. Both ports (LINK-59)</td>
+</tr>
+<tr>
+<td>0x62 <code>DATA_WRITE</code></td>
+<td>op (u8), then: 0 <code>ERASE</code> address (u32, a multiple of 4096); 1 <code>PROGRAM</code> address (u32), 1-64 bytes inside one 256-byte page; 2 <code>STAMP</code> layout (u16: 3)</td>
+<td>— , queued for the Storage task (done in order; a <code>DATA_READ</code> answers <code>busy</code> until it is). Calibration or the update area: <code>refused</code>; misaligned, across a page, empty: <code>bad argument</code>; <code>STAMP</code> of another layout: <code>invalid</code> and why; <code>busy</code>: the other port writes, or the queue is full (send it again). From Bluetooth: <code>refused</code>. The first one stops the store's own records until a restart (LINK-61). <code>STAMP</code>: the header sector erased and the layout 3 header written (below), then the radio restarts, as after <code>REBOOT</code> (LINK-62)</td>
+</tr>
+<tr>
+<td>0x63 <code>CLOCK</code></td>
+<td>optionally UTC seconds (u32, 2020-2099)</td>
+<td>UTC seconds now (u32; 0 no time yet), the clock's source (u8: 0 none, 1 GPS, 2 set by hand or over the link). With seconds: the clock set as 0 6 6 sets it by hand (GPS-23; GPS time takes over at the next fix while 0 6 6 says "from GPS"); out of range or another length <code>bad argument</code>. Only from radios whose second capability byte says 4 (LINK-65)</td>
+</tr>
+<tr>
+<td>0x60 <code>STOCK_RESTORE</code></td>
+<td>op (u8), then: 0 <code>START</code> (nothing; the cable only, not while transmitting); 1 <code>ERASE</code> sector address (u32); 2 <code>PROGRAM</code> address (u32), 1-128 bytes within one 256-byte page; 3 <code>CRC</code> address (u32), length (u32); 4 <code>FINISH</code></td>
+<td><code>START</code>: chip size (u32), the calibration sector's CRC-32 (u32), range count (u8), each range's start and end (u32), then the MCU's unique ID (12 bytes, its three words little-endian, lowest first; decision 263): the radio stops and serves only these requests until it resets (other types: <code>busy</code>). <code>ERASE</code>/<code>PROGRAM</code>: <code>refused</code> outside the ranges, in calibration or the update area; <code>bad argument</code> misaligned. <code>CRC</code>: the CRC-32 (u32). <code>FINISH</code>: then the radio resets into the bootloader, saving nothing (BACKUP-7, decision 261)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Records</strong> (<code>what</code>; the same layouts the radio stores):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Index</th>
+<th>Layout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 settings</td>
+<td>0</td>
+<td>The settings record (<code>ferrite-app</code> <code>persist.rs</code>, the <code>Settings</code> fields in order, the flag byte, then the power-on message), under 512 bytes; the PIN reads as zeros (32 spare bytes, once the approval tokens, are zeros too); protected fields kept on write (LINK-21)</td>
+</tr>
+<tr>
+<td>2 channel</td>
+<td>0–3999</td>
+<td>number (u16), zone (u16, 0xFFFF none; one byte, 255 none, before protocol 3), RX (u32, 10 Hz), name (16 bytes, 0-padded, printable ASCII; characters outside the name set are written as <code>-</code>, CHAN-31), the slot settings (mode, narrow, RX tone, TX tone, offset, power, step, squelch, busy, reverse and split flags), flags (skip 1, APRS 2, RX only 4), end tone and tail (1 byte as record byte 31, TONE-17; a writer may leave it off: Global): 41 bytes (40 before protocol 3). A zone with its 256 channels already (CHAN-35): <code>invalid</code> "zone: full (256 channels at most)"</td>
+</tr>
+<tr>
+<td>3 zone</td>
+<td>0–511 (the next one creates)</td>
+<td>name (16 bytes), scan all, shown, by distance, resume, dwell, a reserved byte (0; it was smart scan), priority channels (2 × u16, 0xFFFF none), then (protocol 3) its channel count (u16, read only: a write may leave it off, and one sent is ignored; CHAN-36): 28 bytes read, 26 or 28 written</td>
+</tr>
+<tr>
+<td>4 range preset</td>
+<td>0–15 (the next one creates)</td>
+<td>name (12 bytes), start, end (u32, 10 Hz), step, mode, narrow, resume (0 Global, 1–10 s, 11 carrier drop, 12 stop on hit; a record written without it reads as Global); its skips stay the radio's</td>
+</tr>
+<tr>
+<td>5 APRS settings</td>
+<td>0</td>
+<td>frequency (u16, 5 kHz units; 0 the region's), beacon mode (0 off, 1 manual, 2-9 every 1, 2, 5, 10, 15, 20, 30, 60 min, 10-16 every 0.1, 0.2, 0.5, 1, 2, 5, 10 km, 17 smart; bit 7 paused, the mode kept), power (0 low, 1 mid, 2 high), path (0 none, 1 WIDE1-1, 2 WIDE1-1,WIDE2-1, 3 custom, only once one is set), digipeater (bit 0 on, bit 1 my callsign too, bits 4-6 the wait 0-5 s), beacon after voice (0, 1), SSID (0-15), custom path (16 bytes, 0-padded), FX.25 on transmit (0 off, 16, 32, 64 check bytes; APRS-45), then (decision 347) the message sound (an index into the chimes, APRS-6.1), symbol (APRS-47), TX delay (10-100, 10 ms units, APRS-48), TX level (0-2, APRS-49), the comment (40 bytes, printable ASCII, 0-padded, APRS-50), ambiguity (0-4, APRS-51), Mic-E (0 off, 1-7, APRS-52), telemetry (0, 1, APRS-54): 72 bytes, written whole and checked as MENU 0 5's editors check (LINK-43; a 25- or 24-byte record keeps the radio's values past its end)</td>
+</tr>
+<tr>
+<td>6 contact</td>
+<td>0–1015, in callsign order (APRS-37)</td>
+<td>callsign (10 bytes, 0-padded), name (12 bytes, 0-padded), flags (bit 0: delete). <code>WRITE_MANY</code> adds or renames by callsign whatever the index (use 0xFFFF) and deletes with bit 0; a full book answers <code>invalid</code> "1016 contacts"</td>
+</tr>
+<tr>
+<td>7 channel position</td>
+<td>0–3999, the channel's number</td>
+<td>latitude, longitude (i32 each, little-endian, degrees x 1e7, north and east positive): 8 bytes, as the channel record stores them (CHAN-2). <code>READ_MANY</code> lists only the channels that have one (23 to an answer); <code>WRITE_MANY</code> sets it, or clears it with a record of length 0; out of range (latitude beyond ±90, longitude beyond ±180) answers <code>invalid</code>, another length <code>bad argument</code>; no channel at that number: nothing changes. <code>USED</code> of it: <code>bad argument</code>. Only from radios whose <code>HELLO</code> says 64 (LINK-53)</td>
+</tr>
+<tr>
+<td>8 quick message</td>
+<td>0–8 (TEXT-7)</td>
+<td>flags (u8: 1 the owner's own text; 0 the factory text), then the text (0-67 bytes). <code>READ_MANY</code> lists all nine, with the text the radio uses. <code>WRITE_MANY</code> with flag 1 sets the text (printable, no vertical bar, tilde or open brace; empty stays empty), with flag 0 puts the factory text back (any text sent is ignored); a bad text answers <code>invalid</code>, an empty record <code>bad argument</code>, index 9 or more <code>not found</code> (LINK-54)</td>
+</tr>
+<tr>
+<td>9 waypoint</td>
+<td>0–2031, newest first (GPS-10)</td>
+<td>name (16 bytes, 0-padded, printable ASCII, at least 1), latitude, longitude (i32, degrees × 1e7), source (u8: 0 marked, 1 APRS, 2 link, 3 grid): 25 bytes. <code>WRITE_MANY</code> at an index in the list replaces that waypoint in its place; at 0xFFFF adds one as the newest (<code>invalid</code> "2032 waypoints" when full); a record of length 0 deletes the one at that index. Each record is applied after the one before it is stored, so indexes are the list as the earlier records left it: delete from the highest index down, then replace, then add. Bad name, position or source: <code>invalid</code> and the reason; another length <code>bad argument</code>; an index past the list <code>not found</code> (LINK-55)</td>
+</tr>
+<tr>
+<td>10 DTMF memory</td>
+<td>0–15 (DTMF-12)</td>
+<td>the symbols (length u8, then 1-16 of <code>0-9 A-D * #</code> as ASCII; lower case is taken as capitals), then the name (the rest: up to 10 printable bytes; none for no name). <code>READ_MANY</code> lists only the memories set. <code>WRITE_MANY</code> sets both, writing each only when it changed; a record of length 0 clears the memory and its name; bad symbols or name: <code>invalid</code> and the reason (LINK-56)</td>
+</tr>
+<tr>
+<td>11 range preset skips</td>
+<td>0–15, the preset's index (as 4)</td>
+<td>the skipped frequencies (u32 each, 10 Hz), 0-48 of them (SCAN-10), blank entries left out (LINK-58.1). <code>READ_MANY</code> lists the presets that have any. <code>WRITE_MANY</code> replaces the list (length 0 clears it); a frequency outside the preset's start and end, or twice, answers <code>invalid</code> and the reason; a length not a multiple of 4 <code>bad argument</code>; no preset at that index <code>not found</code>. The list is kept in the preset's record: it stays with its preset when another is deleted, and goes with it when it is (LINK-58)</td>
+</tr>
+<tr>
+<td>12 satellite</td>
+<td>0–31, the place (SAT-2)</td>
+<td>status (u8: 0 active, 1 inactive, 2 unknown), flags (u8: 1 half duplex to start, 2 Doppler on the 70 cm side only to start), transponders used (u8, 0-5), 0, NORAD catalogue number (u32), name (16 bytes, printable ASCII, NUL-padded, at least 1), the elements: epoch (u32, seconds since 2000-01-01 00:00 UTC; u16 milliseconds; 2 bytes 0), inclination, RAAN, argument of perigee, mean anomaly (u32 each, 1e-7 degree), eccentricity (u32, 1e-7), mean motion (u32, 1e-8 revolution a day), B* (f32), 12 bytes 0; then 5 transponders of 16 bytes: uplink (u32, 10 Hz; 0 receive only), downlink (u32, 10 Hz), access tone, arming tone (u16 each, 0.1 Hz; 0 none), kind (u8: 0 voice, 1 APRS, 2 beacon), 3 bytes 0 (unused ones all 0): 152 bytes (<code>ferrite-core</code> <code>sat::wire</code>). <code>READ_MANY</code> lists the places held. <code>WRITE_MANY</code> puts a satellite in its place (its choices, trim, duplex, transponder and power, stay with its catalogue number); length 0 deletes the one there; length 0 at 0xFFFF deletes them all (one rewrite of the region, so the list written after it only programs erased bytes: Console writes a whole list as that, then places 0, 1, ... in order). A transponder outside 144–148 or 430–440 MHz (SAT-13), more than 5, a bad name, status, kind or elements: <code>invalid</code> and the reason; another length <code>bad argument</code>; <code>busy</code> while the record before is still being written (send it again). Only from radios whose second capability byte says 4 (LINK-63)</td>
+</tr>
+<tr>
+<td>13 satellites' info</td>
+<td>0</td>
+<td>declination at the radio (i16, 0.1 degree, east positive; 0x7FFF none, SAT-18), 2 bytes 0, the satellite data's build time (u32, UTC seconds: <code>sats.json</code>'s <code>built</code>), when Console wrote it (u32, UTC seconds), 4 bytes 0: 16 bytes. <code>READ_MANY</code> gives it when one is kept; <code>WRITE_MANY</code> writes it, length 0 clears it; a declination past ±180° <code>invalid</code> (LINK-64, SAT-21)</td>
+</tr>
+<tr>
+<td>14 radio record</td>
+<td>0</td>
+<td>Watch (u8, 0 1 1: 0 off, 1 A+B, 2 A+B+C), Battery Save (u8, 0 7 7 1: 0 off, 1-3), the GPS fix (u8: 0 none, 2 2D, 3 3D; read only), the message sound (u8, 0 7 5 5: an index into the chimes), latitude, longitude (i32 each, degrees × 1e7, north and east positive: the fix, or the fixed position 0 6 9 when there is none and it is on, GPS-3; read only), the fix's age (u16, seconds; 0xFFFF none): 14 bytes (LINK-66, decision 347). <code>READ</code> and <code>WRITE</code> (index 0); a write takes Watch and Battery Save, and the message sound when it is 4 bytes or more, each as the menu changes it.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Event log records</strong> (<code>LOG_READ</code>, LINK-42; the log screen's fields, INBOX-6): sequence number (u32), age (u32, seconds before the answer: the radio's clock has no date before GPS or a hand-set time, so the PC dates it from its own), source (u8: 0 APRS, 1 Pager, 2 SAME, 3 DSC, 4 AIS, 5 DTMF, 6 Selcall, 7 GPS), slot (u8), flags (u8: 1 unread, 2 a position follows), frequency (u32, 10 Hz), ID (u32), x (u16), y (u16): 23 bytes; then latitude and longitude (i32 each, degrees x 1e7) when flag 2 is set; then the name (length u8, up to 20 bytes) and the text (length u8, up to 64 bytes). At most 117 bytes, so an answer holds at least two. What ID, x, y, name and text hold depends on the source:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>ID</th>
+<th>x, y</th>
+<th>name</th>
+<th>text</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>APRS</td>
+<td></td>
+<td></td>
+<td>from</td>
+<td>the message</td>
+</tr>
+<tr>
+<td>Pager</td>
+<td>capcode</td>
+<td>baud, function</td>
+<td></td>
+<td>the message</td>
+</tr>
+<tr>
+<td>SAME</td>
+<td></td>
+<td></td>
+<td></td>
+<td>the header</td>
+</tr>
+<tr>
+<td>DSC</td>
+<td>MMSI</td>
+<td>category (0 routine, 1 safety, 2 urgency, 3 distress)</td>
+<td></td>
+<td>nature or the call</td>
+</tr>
+<tr>
+<td>AIS</td>
+<td>MMSI</td>
+<td>course (degrees), speed (0.1 kn)</td>
+<td>vessel</td>
+<td></td>
+</tr>
+<tr>
+<td>DTMF</td>
+<td></td>
+<td></td>
+<td></td>
+<td>the sequence</td>
+</tr>
+<tr>
+<td>Selcall</td>
+<td>unit ID</td>
+<td></td>
+<td>format</td>
+<td>what it sent</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>APRS records</strong> (<code>HEARD</code>, <code>MSGS</code> and their events; LINK-44). A station: flags (u8: 1 a position follows, 2 course and speed, 4 altitude), callsign (length, text), symbol (u8: 0 car, 1 home, 2 digi, 3 weather, 4 handheld, 5 iGate, 6 truck, 7 boat), age (u32, seconds), times heard (u16), then the latitude and longitude (2 × i32, degrees × 1e7), course (u16, degrees) and speed (u16, km/h), altitude (i32, m) as the flags say, the path (length, text: the digipeaters, the used one marked <code>*</code>; empty when heard direct), the comment (length, text, up to 40). A message: in (u8: 1 to us, 0 ours), state (u8: 0 unread, 1 read, 2 pending, 3 acked, 4 retrying, 5 failed, 6 rejected: APRS-34; a reader shows a value it doesn't know as unknown), tries (u8, while retrying), age (u32, seconds), who (length, text: from, or to), the text (length, text).</p>
+<p><strong>Events</strong> (<code>EVENT</code>'s payload, LINK-46): kind 1 a station heard: the heard list's count (u8), the station. Kind 2 a new message, in or out: the count (u16), the message. Kind 3 a message's state changed: the count (u16), the message as it is now. Kind 4 Live View: below. Kind 5 an event logged (LINK-57): the record as <code>LOG_READ</code> gives it (below), its sequence number first; oldest first, each once.</p>
+<p><strong>Live View</strong> (kind 4, LINK-47, LINK-48; shared code: <code>ferrite-core</code> <code>liveview.rs</code>, a client in <code>tools/ferrite_link.py</code>'s <code>LiveView</code>). The compact form is the <code>UI</code> readback's lines (up to 48) less <code>state</code>'s <code>frame=</code> and <code>ago=</code>, each line cut after its last whole token that fits 230 coded bytes. A line's tokens are split at the spaces outside double quotes (inside them a backslash escapes the next byte); joining them with one space gives the line. Text on the wire is coded: a byte 0x01-0x1F stands for that entry of the dictionary (version 1), any other byte for itself:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 <code>row␣</code></td>
+<td>2 <code>"␣"</code></td>
+<td>3 <code>␣sel</code></td>
+<td>4 <code>␣dot</code></td>
+<td>5 <code>␣grey</code></td>
+<td>6 <code>card␣</code></td>
+<td>7 <code>␣active=</code></td>
+<td>8 <code>␣head="</code></td>
+</tr>
+<tr>
+<td>9 <code>"␣state="</code></td>
+<td>10 <code>␣freq=</code></td>
+<td>11 <code>␣name="</code></td>
+<td>12 <code>"␣mode="</code></td>
+<td>13 <code>"␣tone="</code></td>
+<td>14 <code>"␣shift="</code></td>
+<td>15 <code>"␣power="</code></td>
+<td>16 <code>"␣s="S</code></td>
+</tr>
+<tr>
+<td>17 <code>"␣meter=</code></td>
+<td>18 <code>␣rx=</code></td>
+<td>19 <code>␣scan=</code></td>
+<td>20 <code>␣kind=slot</code></td>
+<td>21 <code>hints␣"</code></td>
+<td>22 <code>screen␣</code></td>
+<td>23 <code>"␣title="</code></td>
+<td>24 <code>bar␣lock=</code></td>
+</tr>
+<tr>
+<td>25 <code>␣watch=</code></td>
+<td>26 <code>␣inbox=</code></td>
+<td>27 <code>␣battery=</code></td>
+<td>28 <code>␣clock=</code></td>
+<td>29 <code>state␣dark=</code></td>
+<td>30 <code>␣keyed=</code></td>
+<td>31 <code>qmenu␣"</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>(␣ is a space.) An update: seq (u8), flags (u8: 1 the whole state: drop every line first; 2 more follows soon: the check isn't valid yet), check (u16: FNV-1a 32 over every line, each followed by <code>\n</code>, its low 16 bits), lines (u8: the count after; new lines start empty), then ops to the end, each led by a byte whose top two bits are the op and the low six the line:</p>
+<ul>
+<li>0 LINE: length (u8), the line, coded.</li>
+<li>1 TOKENS: the line's token count after (u8), entries (u8), then each entry: token index (u8; bit 7: the value only, the token's key up to its first <code>=</code> is the one there), length (u8), the token or the value, coded. Tokens past the count go; new ones start empty.</li>
+<li>2 TOKENS with the count unchanged: as 1 without the count byte.</li>
+</ul>
+<p>A client applies an update only if it carries the whole state or the seq after the last one it applied, then, unless more follows, checks its lines against the check; otherwise (a lost or late update, a mismatch) it sends <code>SUBSCRIBE</code> without renew and gets the whole state. The radio diffs against what it last sent this session (1 KB of the lines' text, longer screens' lines by hash and then sent whole), so an update is exact. A meter moving on one card is one op of 11 bytes (op 2 on the card's line, two entries: <code>s=</code>'s value <code>"S3"</code> and <code>meter=</code>'s), 17 with the kind and header, 23 on the wire.</p>
+<p><strong>Layouts and the update</strong> (LINK-59 – LINK-62, UPD-16, decision 333). What Console needs to move a radio's data from layout 2 to layout 3 with <code>DATA_READ</code> and <code>DATA_WRITE</code> alone; shared code: <code>ferrite-core</code> <code>layout.rs</code> (the map), <code>ferrite-store</code> <code>records.rs</code> (the records), <code>store.rs</code> (the header), <code>logs.rs</code> (the rings). Little-endian throughout; CRC-16 is CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF, no reflection, no final XOR), CRC-32 is CRC-32/ISO-HDLC (as <code>DATA_READ</code>'s).</p>
+<p>Layout 3, the chip by address (4 KB sectors; never written: calibration and the update area):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Address</th>
+<th>Size</th>
+<th>Region</th>
+<th>Address</th>
+<th>Size</th>
+<th>Region</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x000000</td>
+<td>4 KB</td>
+<td>Layout header</td>
+<td>0x058000</td>
+<td>32 KB</td>
+<td>APRS contacts: 1,016 (127 a sector)</td>
+</tr>
+<tr>
+<td>0x001000</td>
+<td>8 KB</td>
+<td>Settings and slots, copies A and B</td>
+<td>0x060000</td>
+<td>64 KB</td>
+<td>APRS heard ring: 496 (31 a sector)</td>
+</tr>
+<tr>
+<td>0x003000</td>
+<td>4 KB</td>
+<td>User trims</td>
+<td>0x070000</td>
+<td>64 KB</td>
+<td>APRS message ring: 496</td>
+</tr>
+<tr>
+<td>0x004000</td>
+<td>4 KB</td>
+<td>Range presets and DTMF memories</td>
+<td>0x080000</td>
+<td>64 KB</td>
+<td>GPS waypoints: 2,032 (127 a sector)</td>
+</tr>
+<tr>
+<td>0x005000</td>
+<td>4 KB</td>
+<td>HF state (planned)</td>
+<td>0x090000</td>
+<td>64 KB</td>
+<td>Text pack (an SPI part, UPD-21)</td>
+</tr>
+<tr>
+<td>0x006000</td>
+<td>8 KB</td>
+<td>Satellites (planned)</td>
+<td>0x0A0000</td>
+<td>64 KB</td>
+<td>Packet mailbox (held)</td>
+</tr>
+<tr>
+<td>0x008000</td>
+<td>16 KB</td>
+<td>SSB patch</td>
+<td>0x0B0000</td>
+<td>64 KB</td>
+<td>Dictionary: predictive text's words (decision 345); then 0x0C0000, 1,024 KB free</td>
+</tr>
+<tr>
+<td>0x00C000</td>
+<td>8 KB</td>
+<td>Free: config growth</td>
+<td>0x1C0000</td>
+<td>512 KB</td>
+<td>Language packs (planned)</td>
+</tr>
+<tr>
+<td>0x00E000</td>
+<td>4 KB</td>
+<td>Migration mark (decision 339)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x00F000</td>
+<td>4 KB</td>
+<td>Factory calibration: never written</td>
+<td>0x240000</td>
+<td>256 KB</td>
+<td>Boot animation and screens (planned)</td>
+</tr>
+<tr>
+<td>0x010000</td>
+<td>256 KB</td>
+<td>Channels: 4,000 (63 a sector)</td>
+<td>0x280000</td>
+<td>256 KB</td>
+<td>Fonts (planned)</td>
+</tr>
+<tr>
+<td>0x050000</td>
+<td>20 KB</td>
+<td>Zones: 512 (127 a sector)</td>
+<td>0x2C0000</td>
+<td>128 KB</td>
+<td>Event log ring: 992</td>
+</tr>
+<tr>
+<td>0x055000</td>
+<td>12 KB</td>
+<td>APRS settings and quick messages, A and B (and a spare sector)</td>
+<td>0x2E0000</td>
+<td>128 KB</td>
+<td>Scratch ring (32 sectors)</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>0x300000</td>
+<td>1 MB</td>
+<td>Update area: never written</td>
+</tr>
+</tbody>
+</table></div>
+<p>The layout header (20 bytes at 0x000000, the rest of its sector erased): magic (u32 0x54525246, the bytes <code>46 52 52 54</code>), layout (u16: 3), 10 installer bytes (erased, 0xFF; bytes 6-9 later hold the calibration sector's CRC-32, which the firmware programs into them, CAL-7), CRC-32 (u32) of bytes 0-15 with bytes 6-9 taken as 0xFF. Layout 2 had the same header at 0x02C000 with layout 2. The radio writes it, never Console (raw writes to it are refused): the format, or the begin before a power-on's first raw write (decision 339).</p>
+<p>The migration mark (decision 339; 16-byte records at 0x00E000, 256 places, raw writes refused): magic (u32 0x564D5246, the bytes <code>46 52 4D 56</code>), the layout found (u16), this layout (u16: 3), 4 bytes erased, CRC-32 of bytes 0-11. Before the first raw write of a power-on the radio programs one into the first erased place (none left: the sector erased first) unless a valid one is there, then the layout 3 header at 0x000000 unless a good one is there (that sector erased first if it holds anything else), each read back. A valid mark means a move not stamped: the radio waits for Console (UPD-16) whatever the header says, and says the chip's layout as 255. <code>STAMP</code> checks the header and clears the mark, programming its 16 bytes to zero (no erase), taken only once the store has nothing queued or being written. So the chip always holds the old header, or the mark, or (stamped) the new header and all the data.</p>
+<p>The channel record (64 bytes; channel n at 0x010000 + (n / 63) × 4096 + (n % 63) × 64; each sector's last 64 bytes free): 0 RX (u32, 10 Hz; 0xFFFFFFFF: empty), 4 TX (u32: 0 the same as RX; else the absolute TX frequency, a split when flag bit 10 is set), 8 mode (0 FM, 1 NFM, 2 AM, 3-5 HF modes, CHAN-23, CHAN-26), 9 narrow (0, 1), 10 power + 1 (0 default), 11 step + 1 (0 the band's), 12 RX tone (u16, CHAN-3), 14 TX tone (u16), 16 flags (u16: bits 0 skip, 1 APRS, 2 RX only, 3 busy lockout, 5 talkaround, 6 hidden, 7 has position, 8 priority, 9 reverse, 10 split; 4 and 11-15 kept as they are), 18 the zone's low byte, 19 squelch (0 Global, 1-10 levels 0-9), 20 latitude and 24 longitude (i32, 1e-7 degree; 0x7FFFFFFF none), 28-30 kept, 31 end tone (bits 0-2) and tail (bits 3-4), 32 name (16 bytes, 0-padded), 48-59 kept (48 is 0 in a new record, 49-59 0xFF), 60 version (2), 61 the zone's high byte, 62 CRC-16 (u16) of bytes 0-61. The zone is u16 0-511, 0xFFFF none. It holds a channel when the RX isn't 0xFFFFFFFF, the CRC agrees, byte 60 is 2 and the zone is 0-511 or 0xFFFF. Version 1 (layout 2): byte 60 1, byte 61 0xFF, the zone the one byte 18 (0-253, 255 none).</p>
+<p>The zone record (32 bytes; zone z at 0x050000 + (z / 127) × 4096 + (z % 127) × 32): 0 name (16, 0-padded), 16 flags (bit 0 scan all, 1 shown in ◀▶, 2 sort by distance), 17 resume (0 Global, 1-10 s, 11 carrier drop, 12 stop on hit), 18 dwell, 19 0, 20 priority 1 and 22 priority 2 (u16 channel numbers, 0xFFFF none), 24 the channel count (u16, CHAN-36; 0xFFFF in layout 2), 26-29 0xFF, 30 CRC-16 of bytes 0-29. Empty when bytes 0-29 are all 0xFF or the CRC disagrees. Zones exist from 0 up to the last record held (a deleted earlier one stays as an empty, unnamed zone).</p>
+<p>Layout 2 to 3 (Console, from its copy of 0x02C000-0x08CFFF and layout 2's scratch ring 0x1E0000-0x1FFFFF). First, layout 2's own recovery: a scratch sector whose last 32 bytes (at offset 4064) start with a valid footer (magic u32 0x52435346, the target address u32, the CRC-32 of the sector's first 4064 bytes, a CRC-16 of those 12 footer bytes) has its 4064 bytes put over its target sector in the copy. Then, region by region (each layout 3 region erased whole, then its bytes programmed; 64-byte pieces that are all 0xFF can be skipped):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Layout 2</th>
+<th>Layout 3</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Header 0x02C000</td>
+<td>0x000000</td>
+<td>Not copied: the radio writes layout 3's before the first raw write, behind the migration mark; <code>STAMP</code> clears the mark, last</td>
+</tr>
+<tr>
+<td>Settings A 0x02D000, B 0x02E000</td>
+<td>0x001000, 0x002000</td>
+<td>Each sector copied as it is (the record holds no address; the firmware reads its slots' one-byte zones, state version 1, and saves version 2 later)</td>
+</tr>
+<tr>
+<td>Channels 0x02F000-0x03EFFF (0-999)</td>
+<td>0x010000-0x01FFFF</td>
+<td>Each record holding a channel (version 1, as above): byte 61 the zone's high byte (0x00; 0xFF for none), byte 60 2, the CRC again; at the same offset from its region's start (the same number). Any other slot stays erased</td>
+</tr>
+<tr>
+<td>Zones 0x03F000-0x040FFF (0-253)</td>
+<td>0x050000-0x050FFF</td>
+<td>Each record held: bytes 24-25 its channel count after the translation, the CRC again; at the same offset. A zone with more than 256 channels (layout 2 had no limit; CHAN-35) keeps its first 256 by number; the rest go, 256 at a time, to new zones after the last (a copy of its record named with " 2", " 3" and so on, cut to 16 characters), their channels' zone set to it; with no zone number left (512), to no zone</td>
+</tr>
+<tr>
+<td>Presets and DTMF 0x041000</td>
+<td>0x004000</td>
+<td>Copied</td>
+</tr>
+<tr>
+<td>Spare 0x042000</td>
+<td>(none)</td>
+<td>Dropped</td>
+</tr>
+<tr>
+<td>APRS settings A 0x043000, B 0x044000</td>
+<td>0x055000, 0x056000</td>
+<td>Copied</td>
+</tr>
+<tr>
+<td>APRS messages 0x045000-0x04AFFF (186)</td>
+<td>0x070000-0x07FFFF (496)</td>
+<td>Each record held (128 bytes: seq u32 at 0, magic <code>E7 01</code> at 8, CRC-16 at 126; record seq s sits at slot s % capacity, 31 a sector, the sector's last 128 bytes free) to slot s % 496 of layout 3's ring: sector slot / 31, offset (slot % 31) × 128, its bytes unchanged</td>
+</tr>
+<tr>
+<td>Event log 0x04B000-0x06AFFF (992)</td>
+<td>0x2C0000-0x2DFFFF (992)</td>
+<td>The 32 sectors copied in order (the same capacity, the same slots)</td>
+</tr>
+<tr>
+<td>SSB patch 0x06B000-0x06EFFF</td>
+<td>0x008000-0x00BFFF</td>
+<td>Copied (the firmware checks its SHA-256)</td>
+</tr>
+<tr>
+<td>Trims 0x06F000</td>
+<td>0x003000</td>
+<td>Copied</td>
+</tr>
+<tr>
+<td>Waypoints 0x070000-0x073FFF</td>
+<td>0x080000-0x083FFF</td>
+<td>Copied (packed from slot 0, 127 a sector, as before)</td>
+</tr>
+<tr>
+<td>Contacts 0x074000-0x075FFF</td>
+<td>0x058000-0x059FFF</td>
+<td>Copied</td>
+</tr>
+<tr>
+<td>Mailbox (free) 0x076000-0x081FFF, stock's record 0x082000, satellites and HF state 0x083000-0x084FFF</td>
+<td>(none)</td>
+<td>Nothing (stock's record is in the install's backup)</td>
+</tr>
+<tr>
+<td>Heard 0x085000-0x08CFFF (248)</td>
+<td>0x060000-0x06FFFF (496)</td>
+<td>As the messages: each record held to slot seq % 496</td>
+</tr>
+<tr>
+<td>Voice prompts 0x200000-0x2FFFFF</td>
+<td>(none)</td>
+<td>Not read (in the install's backup); layout 3's event log and scratch ring are there: erase the scratch ring's 32 sectors too</td>
+</tr>
+</tbody>
+</table></div>
+<p>Then the sector of layout 3 that holds layout 2's header (0x02C000, channel sector 28) last, then <code>STAMP</code> with layout 3: the radio restarts, checks every zone's count against its channels (CHAN-36) and comes up with the settings, slots, channels and lists as they were.</p>
+<hr />
+<h2 id="constants-in-the-firmware">Constants in the firmware</h2>
+<p>Every message type, record kind, capability bit and limit, as <code>ferrite-core/src/link.rs</code> defines them (its doc comment beside each). The text above is the spec; this table is what the firmware builds with.</p>
+<h3 id="top-level"><code>(top level)</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PROTOCOL</code></td>
+<td><code>3</code></td>
+<td>The protocol version in <code>HELLO</code> and its answer. 2: no approval tokens; <code>AUTH</code> with the radio's PIN (decision 104). 3 (decision 333): zone numbers are 2 bytes (the channel record, <code>INFO</code>'s zone count), a zone record ends with its channel count, and the raw SPI data messages (<code>DATA_READ</code>, <code>DATA_WRITE</code>) are there.</td>
+</tr>
+<tr>
+<td><code>MAX_PAYLOAD</code></td>
+<td><code>240</code></td>
+<td>The most payload in a frame (BLE chunks stay small: LINK-16).</td>
+</tr>
+<tr>
+<td><code>MAX_BODY</code></td>
+<td><code>MAX_PAYLOAD + 4</code></td>
+<td>The most body bytes: type, seq, payload, CRC.</td>
+</tr>
+<tr>
+<td><code>MAX_WIRE</code></td>
+<td><code>MAX_BODY + MAX_BODY / 254 + 2</code></td>
+<td>The most bytes a frame takes on the wire: COBS adds one byte per 254, plus the delimiter.</td>
+</tr>
+<tr>
+<td><code>ANSWER</code></td>
+<td><code>0x80</code></td>
+<td>Answers carry the request's type with this bit set.</td>
+</tr>
+<tr>
+<td><code>LOG_FIXED</code></td>
+<td><code>23</code></td>
+<td>A <code>LOG_READ</code> record's fixed part (LINK-42): sequence number (u32), seconds ago (u32), source (u8), slot (u8), flags (u8: <code>LOG_UNREAD</code>, <code>LOG_POS</code>), frequency (u32, 10 Hz), id (u32), x (u16), y (u16).</td>
+</tr>
+<tr>
+<td><code>LOG_UNREAD</code></td>
+<td><code>1</code></td>
+<td>A <code>LOG_READ</code> record's flags: not yet read on the radio.</td>
+</tr>
+<tr>
+<td><code>LOG_POS</code></td>
+<td><code>2</code></td>
+<td>The record has a position: latitude and longitude (i32 each, degrees x 1e7) follow the fixed part.</td>
+</tr>
+<tr>
+<td><code>SAT_LEN</code></td>
+<td><code>crate::sat::wire::REC_LEN</code></td>
+<td>A satellite record's length (LINK-63).</td>
+</tr>
+<tr>
+<td><code>SAT_INFO_LEN</code></td>
+<td><code>crate::sat::wire::INFO_LEN</code></td>
+<td>The satellites' info record's length (LINK-64).</td>
+</tr>
+<tr>
+<td><code>RADIO_LEN</code></td>
+<td><code>14</code></td>
+<td><code>what::RADIO</code>'s length.</td>
+</tr>
+<tr>
+<td><code>SATS_MAX</code></td>
+<td><code>32</code></td>
+<td>The most satellites (SAT-2).</td>
+</tr>
+<tr>
+<td><code>PRESET_SKIPS_MAX</code></td>
+<td><code>48</code></td>
+<td>A range preset's skipped frequencies at most (SCAN-10, LINK-58).</td>
+</tr>
+<tr>
+<td><code>QUICK_OWN</code></td>
+<td><code>1</code></td>
+<td>A quick message record's flags (LINK-54): the text is the owner's own (clear: the factory text).</td>
+</tr>
+<tr>
+<td><code>WAYPOINT_LEN</code></td>
+<td><code>25</code></td>
+<td>A waypoint record's length (LINK-55).</td>
+</tr>
+<tr>
+<td><code>ADD</code></td>
+<td><code>0xFFFF</code></td>
+<td><code>WRITE_MANY</code>'s index for a new waypoint (LINK-55): added as the newest.</td>
+</tr>
+<tr>
+<td><code>BT_BAUD</code></td>
+<td><code>9_600</code></td>
+<td>Bluetooth's UART rate (LINK-25, decision 152): the BT513 module's resting rate, 9600 8N1. Stock V0.27 sends its KISS(BLE) frames to the module at 9600 (0x08016EEC: USART1 restarted at 0x2580 through 0x08023F68, the frame written, then back to 115200); stock's own 115200 is for its CPS programming (most likely the vendor's app sets the module to 115200 first: its FF31 handshake carries a rate byte).</td>
+</tr>
+<tr>
+<td><code>BT_FAST</code></td>
+<td><code>115_200</code></td>
+<td>Bluetooth's fast rate (LINK-25.1, decision 285): the module's UART after the per-connection speed unlock (FF31, selector 02), which a host writes once the radio has agreed to <code>BAUD</code> 115200 on Bluetooth. The module keeps it across BLE connections and loses it when powered off (bench, Oct 24, 2026: <code>docs/research/ble-speed.md</code>).</td>
+</tr>
+<tr>
+<td><code>BT_RATES</code></td>
+<td><code>[BT_BAUD, BT_FAST]</code></td>
+<td>The rates <code>BAUD</code> takes on Bluetooth (LINK-15.1): the module's resting rate and the unlocked one.</td>
+</tr>
+<tr>
+<td><code>DEFAULT</code></td>
+<td><code>BtPace { burst: 20, gap_ms: 50 }</code></td>
+<td>One notification's worth, then a 50 ms gap: about 280 B/s at 9600 (a burst is on the wire 21 ms). The BT513 sends what piled up only after its UART has been quiet for between 30 and 40 ms, and then only the last notification's worth: 30 ms lost every UI readback on the bench, 40 ms lost none (LINK-36).</td>
+</tr>
+<tr>
+<td><code>FAST</code></td>
+<td><code>BtPace { burst: 160, gap_ms: 100 }</code></td>
+<td>At <code>BT_FAST</code> (LINK-36.1): 160-byte bursts, 100 ms apart (about 1.6 KB/s). The module takes bursts of about 160 bytes at 115200 but passes on only about 1.6 KB/s on average to a Mac (6-8 notifications every ~30 ms interval, some intervals missed), and still forwards only after its UART has been quiet: 160 B every 50 ms lost about 1 reply in 3, and a steady trickle of 20-byte pieces at 1.6 KB/s lost 7 of 10; 80 B / 50 ms and 160 B / 100 ms passed 10 of 10 (bench, Oct 24, 2026).</td>
+</tr>
+<tr>
+<td><code>MAX_GAP_MS</code></td>
+<td><code>1_000</code></td>
+<td>The longest gap <code>bt pace</code> takes.</td>
+</tr>
+<tr>
+<td><code>RATES</code></td>
+<td><code>[115_200, 230_400, 460_800, 921_600]</code></td>
+<td>Cable rates <code>BAUD</code> may ask for (LINK-11); the radio takes one only if its UART reaches it within 2 %.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="build"><code>build</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RECEIVE</code></td>
+<td><code>0</code></td>
+<td>Receive only: no transmit code (no <code>tx</code> feature).</td>
+</tr>
+<tr>
+<td><code>TX</code></td>
+<td><code>1</code></td>
+<td>Transmits (<code>--features tx</code>).</td>
+</tr>
+<tr>
+<td><code>TX_DRY</code></td>
+<td><code>2</code></td>
+<td>The retired tx-dry build (the PA drive held at 0 at build time; decision 193): no image sends it now, kept so the tools still name a radio that runs an older one.</td>
+</tr>
+<tr>
+<td><code>TX_DRY_ON</code></td>
+<td><code>3</code></td>
+<td>A transmit build with Dry TX on (TX-48): the PA drive held at 0 until it is turned off on the radio, or (the <code>tx</code> build) the radio is powered off; the tx-bench build starts with it on (TX-48.1).</td>
+</tr>
+<tr>
+<td><code>BENCH</code></td>
+<td><code>0x80</code></td>
+<td>Bit 7: the bench commands are in (the <code>bench</code> cargo feature: the bring-up and tx-bench builds; TERM-38). The low bits are the transmit kind above.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="msg"><code>msg</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HELLO</code></td>
+<td><code>0x01</code></td>
+<td>Start a session: protocol version, then the client's name. The answer's third byte says whether the session may go on (1) or must send <code>AUTH</code> first (0: the radio's PIN is set and this is Bluetooth, LINK-30).</td>
+</tr>
+<tr>
+<td><code>INFO</code></td>
+<td><code>0x02</code></td>
+<td>Firmware version and what the radio holds.</td>
+</tr>
+<tr>
+<td><code>AUTH</code></td>
+<td><code>0x04</code></td>
+<td>The radio's PIN as ASCII digits (4-6), on Bluetooth while one is set (LINK-30, LINK-31): Ok, <code>Refused</code> (wrong; it counts toward the radio's lockout, PIN-3), or <code>Busy</code> (locked out: wait).</td>
+</tr>
+<tr>
+<td><code>READ</code></td>
+<td><code>0x10</code></td>
+<td>Read part of a record: what, index, offset, length.</td>
+</tr>
+<tr>
+<td><code>WRITE</code></td>
+<td><code>0x11</code></td>
+<td>Write part of a record: what, index, offset, total length, bytes; applied when the last part arrives.</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>0x12</code></td>
+<td>Delete a channel, zone or preset.</td>
+</tr>
+<tr>
+<td><code>BEGIN</code></td>
+<td><code>0x13</code></td>
+<td>A write session of N records starts: the radio shows its progress (LINK-9).</td>
+</tr>
+<tr>
+<td><code>END</code></td>
+<td><code>0x14</code></td>
+<td>The write session ends.</td>
+</tr>
+<tr>
+<td><code>USED</code></td>
+<td><code>0x15</code></td>
+<td>Which indexes hold a record (LINK-39): what; the answer is the index count (u16), then a bitmap, index i at bit <code>i % 8</code> of byte <code>i / 8</code>.</td>
+</tr>
+<tr>
+<td><code>READ_MANY</code></td>
+<td><code>0x17</code></td>
+<td>Whole records from an index on (LINK-40): what, first index (u16), count (u16). The answer is the next index to ask from (u16), then each record held, as many as fit: index (u16), length (u8), the record; empty indexes are skipped.</td>
+</tr>
+<tr>
+<td><code>WRITE_MANY</code></td>
+<td><code>0x18</code></td>
+<td>Several whole records in one frame (LINK-41): what, then each record as <code>READ_MANY</code> gives them (index, length, record). Applied in order, each as a <code>WRITE</code> of it would be; the answer's first byte after the status is how many were applied (a refusal is the next one's).</td>
+</tr>
+<tr>
+<td><code>STREAM</code></td>
+<td><code>0x19</code></td>
+<td>One request, its answers back to back (LINK-50, decision 285): the payload is another request's type (<code>READ_MANY</code>, <code>HEARD</code>, <code>MSGS</code>, <code>LOG_READ</code> or <code>UI</code>) and its payload. The radio answers with that request's answers in turn, each as its own frame, the first with this request's seq and each next one seq + 1 (so a frame lost on the way shows as a gap, and the PC asks again from the last it has): <code>STREAM_MORE</code> (&#124; ANSWER) while more follow, <code>STREAM</code> (&#124; ANSWER) for the last, each payload exactly the inner request's answer would be. Frames go only while the port has room, so the stream is flow-controlled by the link itself; any new request from the PC ends it. <code>bad argument</code> for another type. Only from radios that say <code>caps::STREAM</code> in <code>HELLO</code>.</td>
+</tr>
+<tr>
+<td><code>STREAM_MORE</code></td>
+<td><code>0x1A</code></td>
+<td>A <code>STREAM</code> answer that more follow (radio to PC only, with <code>super::ANSWER</code>).</td>
+</tr>
+<tr>
+<td><code>LOG_READ</code></td>
+<td><code>0x40</code></td>
+<td>The event log, newest first (LINK-42): before (u32: records with a lower sequence number; 0xFFFFFFFF from the newest), then optionally the most to send (u8, 0: as many as fit). The answer: the next sequence number (u32), the records held (u16), how many follow (u8), then each (<code>LOG_FIXED</code> bytes, the position if it has one, then the name and the text, each a length and the bytes).</td>
+</tr>
+<tr>
+<td><code>SLOT</code></td>
+<td><code>0x16</code></td>
+<td>A slot's working fields, read or changed as the keypad would (LINK-33): the slot (0-2), then optionally a <code>super::slot</code> mask and its fields in bit order. The answer is the slot as it is after.</td>
+</tr>
+<tr>
+<td><code>BAUD</code></td>
+<td><code>0x20</code></td>
+<td>Propose a faster cable rate (LINK-11).</td>
+</tr>
+<tr>
+<td><code>REBOOT</code></td>
+<td><code>0x21</code></td>
+<td>Restart into the bootloader, for a firmware update (LINK-24): the cable, or a Bluetooth session that may go on (LINK-30); refused while transmitting. The answer goes out first, then the radio saves, goes quiet and resets.</td>
+</tr>
+<tr>
+<td><code>CMD</code></td>
+<td><code>0x31</code></td>
+<td>A terminal command line (LINK-34, chapter 37): run as the terminal's command line runs it. The answer is its output: a byte, 1 if more follows (ask with <code>MORE</code>), then text, lines ending in <code>\n</code>; or <code>invalid</code> and the terminal's refusal. A new <code>CMD</code> ends one still running.</td>
+</tr>
+<tr>
+<td><code>MORE</code></td>
+<td><code>0x32</code></td>
+<td>The running command's next output, as <code>CMD</code>'s answer; 1 with no text: the radio is still working on it, ask again shortly. Nothing running: 0 and no text.</td>
+</tr>
+<tr>
+<td><code>KEY</code></td>
+<td><code>0x30</code></td>
+<td>A key on the radio (LINK-19, LINK-20): the key, then what it does (<code>super::key</code>). The keypad and side keys by stock's key code with a press type (LINK-19), the knob (<code>super::key::KNOB</code>), or remote PTT (<code>super::Ptt</code>, LINK-20); anything else answers <code>bad argument</code>.</td>
+</tr>
+<tr>
+<td><code>UI</code></td>
+<td><code>0x33</code></td>
+<td>What the screen shows (LINK-19's readback, decision 150): as <code>CMD</code> <code>ui</code>, its text in lines (the screen, the status bar, the home cards or the list's rows, the hint bar, a toast), <code>MORE</code> for the rest. An optional byte: 0 the state, 1 the key names (<code>ui keys</code>).</td>
+</tr>
+<tr>
+<td><code>SUBSCRIBE</code></td>
+<td><code>0x50</code></td>
+<td>Events this session wants pushed (LINK-46): a <code>super::event</code> mask (0 ends them), then optionally the UI's least gap in 100 ms units and flags (<code>super::event::RENEW</code>). Answer: the mask, the Live View dictionary's version, the next UI sequence number.</td>
+</tr>
+<tr>
+<td><code>EVENT</code></td>
+<td><code>0x51</code></td>
+<td>Radio to PC only, unasked: a frame of this type (below 0x80: the radio sends no requests, so it is never an answer) with the session's own event counter as its seq, the payload an <code>super::event</code> kind and its bytes (LINK-46). Sent by the PC as a request: answered <code>unknown type</code> as any other.</td>
+</tr>
+<tr>
+<td><code>HEARD</code></td>
+<td><code>0x52</code></td>
+<td>The APRS heard list (LINK-44): from an index (u8); the count, then as many stations as fit.</td>
+</tr>
+<tr>
+<td><code>MSGS</code></td>
+<td><code>0x53</code></td>
+<td>APRS messages, in and out, newest first (LINK-44): from an index (u16); the count (u16), then as many as fit.</td>
+</tr>
+<tr>
+<td><code>MSG_SEND</code></td>
+<td><code>0x54</code></td>
+<td>Send an APRS message (LINK-45): to (length, text), the message (length, text); queued as the radio's compose queues it.</td>
+</tr>
+<tr>
+<td><code>MSG_STOP</code></td>
+<td><code>0x55</code></td>
+<td>Stop sending one of our APRS messages (LINK-49, APRS-13.1): to (length, text), the message (length, text); the newest of ours to that station with that text still being tried stops, kept as cancelled.</td>
+</tr>
+<tr>
+<td><code>MSG_DELETE</code></td>
+<td><code>0x59</code></td>
+<td>Delete one APRS message (LINK-52, APRS-46.1): flags (1: one to us), the station (length, text: from, or to), the message (length, text); the newest that matches goes, as the radio's own Delete message.</td>
+</tr>
+<tr>
+<td><code>AUDIO</code></td>
+<td><code>0x56</code></td>
+<td>Receive audio to the PC (LINK-13.1, LINK-13.4): the cable only; payload one byte, 1 to listen (12 kHz µ-law, decision 330), 0 to stop (2 or 3: the bench's raw stream at 12 or 16 kHz, LINK-13.9). The answer carries the stream's rate (u16) and a block's samples (u16). Listening ends with the session (a <code>HELLO</code>, the session going quiet, a new connection): never on by itself (LINK-13.5).</td>
+</tr>
+<tr>
+<td><code>AUDIO_DATA</code></td>
+<td><code>0x57</code></td>
+<td>A block of receive audio, pushed unasked while listening (<code>crate::rxaudio</code>): seq (u16), the slot heard (0xFF none), flags (1: squelch open), then the µ-law codes, a byte a sample; with no codes, a keep-alive while nothing is heard. Never compressed (LINK-51), nor counted there.</td>
+</tr>
+<tr>
+<td><code>AUDIO_RAW</code></td>
+<td><code>0x58</code></td>
+<td>A block of the bench's raw receive audio (LINK-13.9, <code>AUDIO</code> 2 or 3 in a bench build; <code>crate::rawaudio</code>): seq (u16), the first sample's index (u32), the slot heard, flags, then 152 samples of 12 bits, two in three bytes. Pushed unasked, every block whatever the squelch; never compressed, as <code>AUDIO_DATA</code>.</td>
+</tr>
+<tr>
+<td><code>STOCK_RESTORE</code></td>
+<td><code>0x60</code></td>
+<td>The way back to stock (BACKUP-7, LINK-4, LINK-8; <code>crate::restore</code>): the cable only. <code>START</code> stops the radio and hands the cable to the restore until it resets; erase, program and CRC requests follow, then <code>FINISH</code>.</td>
+</tr>
+<tr>
+<td><code>DATA_READ</code></td>
+<td><code>0x61</code></td>
+<td>LINK-59 (decision 333): the SPI flash's data range read raw, bytes or a CRC (<code>super::data</code>): Console's backup before an update moves data to another layout.</td>
+</tr>
+<tr>
+<td><code>DATA_WRITE</code></td>
+<td><code>0x62</code></td>
+<td>LINK-60: the data range written raw, a sector erased or bytes programmed, and the layout header stamped last (<code>super::data</code>): the cable only.</td>
+</tr>
+<tr>
+<td><code>CLOCK</code></td>
+<td><code>0x63</code></td>
+<td>The radio's clock (LINK-65, GPS-23): with a payload, UTC seconds (u32) set it as 0 6 6 does by hand (GPS time takes over at the next fix while 0 6 6 says "from GPS"); empty, it is read. The answer either way: UTC seconds now (u32, 0 while the radio has no time), then its source (u8: 0 none, 1 GPS, 2 set by hand or the link). Only from radios that say <code>super::caps2::SATS</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="data"><code>data</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>READ</code></td>
+<td><code>0</code></td>
+<td><code>DATA_READ</code>: address (u32), length (u8, 1 to <code>READ_MAX</code>); the answer is the bytes.</td>
+</tr>
+<tr>
+<td><code>CRC</code></td>
+<td><code>1</code></td>
+<td><code>DATA_READ</code>: address (u32), length (u32, up to the data range's end); the answer is the CRC-32 (u32) of the bytes, as the layout header's (CRC-32/ISO-HDLC: reflected, poly 0xEDB88320, init and final XOR 0xFFFFFFFF).</td>
+</tr>
+<tr>
+<td><code>ERASE</code></td>
+<td><code>0</code></td>
+<td><code>DATA_WRITE</code>: the 4 KB sector at an address (u32, a multiple of 4096) erased.</td>
+</tr>
+<tr>
+<td><code>PROGRAM</code></td>
+<td><code>1</code></td>
+<td><code>DATA_WRITE</code>: address (u32), then 1 to <code>PROGRAM_MAX</code> bytes programmed, all inside one 256-byte page, into erased bytes (NOR: a program only clears bits).</td>
+</tr>
+<tr>
+<td><code>STAMP</code></td>
+<td><code>2</code></td>
+<td><code>DATA_WRITE</code>: layout version (u16, this firmware's): the layout header written (its sector erased first; magic, version, CRC), then the radio restarts and mounts it. The last write of an update (LINK-62).</td>
+</tr>
+<tr>
+<td><code>READ_MAX</code></td>
+<td><code>232</code></td>
+<td>The most bytes a <code>DATA_READ</code> answers.</td>
+</tr>
+<tr>
+<td><code>PROGRAM_MAX</code></td>
+<td><code>64</code></td>
+<td>The most bytes one <code>PROGRAM</code> carries (a quarter page: an aligned chunk never crosses a page).</td>
+</tr>
+<tr>
+<td><code>PAGE</code></td>
+<td><code>256</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>SECTOR</code></td>
+<td><code>4096</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="caps"><code>caps</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>STREAM</code></td>
+<td><code>1</code></td>
+<td><code>STREAM</code> (LINK-50).</td>
+</tr>
+<tr>
+<td><code>WINDOW</code></td>
+<td><code>2</code></td>
+<td>Two <code>WRITE_MANY</code> frames may be in flight (LINK-41.1): the receive rings hold a whole second frame.</td>
+</tr>
+<tr>
+<td><code>LZ</code></td>
+<td><code>4</code></td>
+<td>This session's frames are compressed from the <code>HELLO</code> answer on (LINK-51): set only when the <code>HELLO</code> asked (bit 0 of its first reserved byte) and the radio's one compression block was free.</td>
+</tr>
+<tr>
+<td><code>DELETE_MANY</code></td>
+<td><code>8</code></td>
+<td><code>WRITE_MANY</code> deletes channels (a record of length 0, LINK-41.2).</td>
+</tr>
+<tr>
+<td><code>AUDIO</code></td>
+<td><code>16</code></td>
+<td><code>AUDIO</code> (LINK-13.4): receive audio over this port (the cable only).</td>
+</tr>
+<tr>
+<td><code>TEXTS</code></td>
+<td><code>32</code></td>
+<td>The readback with the screen as drawn (LINK-19.5): <code>UI</code> what=3, and <code>SUBSCRIBE</code>'s <code>super::event::TEXTS</code>.</td>
+</tr>
+<tr>
+<td><code>POSITION</code></td>
+<td><code>64</code></td>
+<td>Channel positions by <code>READ_MANY</code> and <code>WRITE_MANY</code> of <code>super::what::POSITION</code> (LINK-53, decision 325).</td>
+</tr>
+<tr>
+<td><code>LISTS</code></td>
+<td><code>128</code></td>
+<td>The quick messages, waypoints and DTMF memories by <code>READ_MANY</code> and <code>WRITE_MANY</code> (<code>super::what::QUICK</code>, <code>super::what::WAYPOINT</code>, <code>super::what::DTMF</code>) and <code>SUBSCRIBE</code>'s event log (<code>super::event::SUB_LOG</code>): LINK-54 – LINK-57, decision 327. The byte's last bit: a capability after these goes in a second byte after this one (a client that reads only the first sees none of them).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="caps2"><code>caps2</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRESET_SKIPS</code></td>
+<td><code>1</code></td>
+<td>A range preset's skipped frequencies by <code>READ_MANY</code> and <code>WRITE_MANY</code> of <code>super::what::PRESET_SKIPS</code> (LINK-58, decision 329).</td>
+</tr>
+<tr>
+<td><code>DATA</code></td>
+<td><code>2</code></td>
+<td>Protocol 3 (decision 333): 2-byte zone numbers, the zone record's channel count, <code>USED</code> in parts, and the raw data messages <code>DATA_READ</code> and <code>DATA_WRITE</code> (LINK-59 – LINK-62); <code>HELLO</code> and <code>INFO</code> end with the layout versions (the firmware's, the chip's).</td>
+</tr>
+<tr>
+<td><code>SATS</code></td>
+<td><code>4</code></td>
+<td>Satellite mode's records (LINK-63 – LINK-65, decision 340): <code>super::what::SAT</code>, <code>super::what::SAT_INFO</code> by <code>READ_MANY</code> and <code>WRITE_MANY</code>, and <code>super::msg::CLOCK</code>.</td>
+</tr>
+<tr>
+<td><code>RADIO</code></td>
+<td><code>8</code></td>
+<td>Decision 347: the <code>super::what::RADIO</code> record, and the APRS record with every MENU 0 5 value (LINK-43), so Console needs no line commands.</td>
+</tr>
+<tr>
+<td><code>LINE_CMDS</code></td>
+<td><code>16</code></td>
+<td>The line commands answer: <code>CMD</code> (LINK-34) and the terminal's command line. Without it (a user build, decision 347) <code>CMD</code> is refused and Console uses the records alone.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="event"><code>event</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SUB_HEARD</code></td>
+<td><code>1</code></td>
+<td>Mask bits.</td>
+</tr>
+<tr>
+<td><code>SUB_MSGS</code></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>SUB_UI</code></td>
+<td><code>4</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>SUB_LOG</code></td>
+<td><code>8</code></td>
+<td>New event log entries (LINK-57): only from a radio that says <code>super::caps::LISTS</code>.</td>
+</tr>
+<tr>
+<td><code>RENEW</code></td>
+<td><code>1</code></td>
+<td><code>SUBSCRIBE</code>'s flags bit: keep the Live View stream as it is (a keepalive); without it a UI subscription starts over with the whole state.</td>
+</tr>
+<tr>
+<td><code>TEXTS</code></td>
+<td><code>2</code></td>
+<td><code>SUBSCRIBE</code>'s flags bit: the Live View carries the screen as drawn, its <code>t</code> lines (LINK-19.5); only from a radio that says <code>super::caps::TEXTS</code>.</td>
+</tr>
+<tr>
+<td><code>HEARD</code></td>
+<td><code>1</code></td>
+<td>Kinds: a station heard (the count, then the station as <code>HEARD</code> gives it).</td>
+</tr>
+<tr>
+<td><code>MSG</code></td>
+<td><code>2</code></td>
+<td>A new message, in or out (the count, then the message as <code>MSGS</code> gives it).</td>
+</tr>
+<tr>
+<td><code>MSG_STATE</code></td>
+<td><code>3</code></td>
+<td>A message's state changed: acked, retrying, failed, read.</td>
+</tr>
+<tr>
+<td><code>UI</code></td>
+<td><code>4</code></td>
+<td>Live View: the UI's compact state or what changed (<code>crate::liveview</code>).</td>
+</tr>
+<tr>
+<td><code>LOG</code></td>
+<td><code>5</code></td>
+<td>A new event log entry (LINK-57): the record as <code>LOG_READ</code> gives it (its sequence number first).</td>
+</tr>
+<tr>
+<td><code>UI_GAP_BT_MS</code></td>
+<td><code>500</code></td>
+<td>The UI's least gap by default: Bluetooth 500 ms, the cable 200 ms; at least 100 ms.</td>
+</tr>
+<tr>
+<td><code>UI_GAP_CABLE_MS</code></td>
+<td><code>200</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>RATE_BT</code></td>
+<td><code>200</code></td>
+<td>Events' bytes a second at most, and the most saved up: Bluetooth leaves room for the answers in its ~280 (LINK-36).</td>
+</tr>
+<tr>
+<td><code>RATE_BT_FAST</code></td>
+<td><code>1000</code></td>
+<td>Bluetooth at its unlocked 115200 (LINK-25.1): the module passes about 1.6 KB/s (research/ble-speed.md); the events take 1 KB/s of it, the rest for the answers. The screen as drawn (LINK-19.5) needs it.</td>
+</tr>
+<tr>
+<td><code>RATE_CABLE</code></td>
+<td><code>4000</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>RATE_CABLE_LISTEN</code></td>
+<td><code>3000</code></td>
+<td>The cable while its session listens (LINK-13.6, decision 331): the audio's ~12.6 KB/s comes first, so the events (the Live View) take less of the ~23 KB/s 230400 carries, leaving room for the answers.</td>
+</tr>
+<tr>
+<td><code>BURST</code></td>
+<td><code>300</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>QUIET_MS</code></td>
+<td><code>10_000</code></td>
+<td>Events stop when the session has sent nothing for this long (<code>super::msg::SUBSCRIBE</code> with <code>RENEW</code> keeps them going).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="slot"><code>slot</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FREQ</code></td>
+<td><code>1</code></td>
+<td>The VFO's frequency, u32 in 10 Hz.</td>
+</tr>
+<tr>
+<td><code>MODE</code></td>
+<td><code>2</code></td>
+<td>u8: 0 FM, 1 NFM, 2 AM.</td>
+</tr>
+<tr>
+<td><code>POWER</code></td>
+<td><code>4</code></td>
+<td>u8: 0 low, 1 mid, 2 high.</td>
+</tr>
+<tr>
+<td><code>RX_TONE</code></td>
+<td><code>8</code></td>
+<td>u16, CHAN-3's tone word (the tone decoded).</td>
+</tr>
+<tr>
+<td><code>TX_TONE</code></td>
+<td><code>16</code></td>
+<td>u16 (the tone sent).</td>
+</tr>
+<tr>
+<td><code>VFO</code></td>
+<td><code>32</code></td>
+<td>No bytes: to the slot's VFO (V/M), before the frequency.</td>
+</tr>
+<tr>
+<td><code>ACTIVE</code></td>
+<td><code>64</code></td>
+<td>No bytes: make it the active slot (the SLOT key), after the rest.</td>
+</tr>
+<tr>
+<td><code>OFFSET</code></td>
+<td><code>128</code></td>
+<td>i32 then u8, as the answer gives them: the signed shift in 10 Hz (0 simplex) and 0, or the split's TX frequency and 1 (MENU 5's paths; LINK-33).</td>
+</tr>
+<tr>
+<td><code>SPLIT</code></td>
+<td><code>1</code></td>
+<td>The answer's flags byte.</td>
+</tr>
+<tr>
+<td><code>APRS</code></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>SCANNING</code></td>
+<td><code>4</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="key"><code>key</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UP</code></td>
+<td><code>0</code></td>
+<td>A keypad key let go (as remote PTT's <code>OFF</code>).</td>
+</tr>
+<tr>
+<td><code>DOWN</code></td>
+<td><code>1</code></td>
+<td>A keypad key pressed and held, until <code>UP</code> (or 30 s: <code>HOLD_MAX_MS</code>).</td>
+</tr>
+<tr>
+<td><code>SHORT</code></td>
+<td><code>2</code></td>
+<td>Pressed and let go: a short press (KEY-3).</td>
+</tr>
+<tr>
+<td><code>LONG</code></td>
+<td><code>3</code></td>
+<td>Held to the long press (KEY-3: 700 ms), then let go: the radio lets it go <code>LONG_HOLD_MS</code> after the answer, and answers <code>busy</code> to keys until then.</td>
+</tr>
+<tr>
+<td><code>LONG_HOLD_MS</code></td>
+<td><code>750</code></td>
+<td>How long a remote long press is held.</td>
+</tr>
+<tr>
+<td><code>HOLD_MAX_MS</code></td>
+<td><code>30_000</code></td>
+<td>A remote key held down longer than this is let go.</td>
+</tr>
+<tr>
+<td><code>KNOB</code></td>
+<td><code>0x81</code></td>
+<td>The knob: then the steps, an i8.</td>
+</tr>
+<tr>
+<td><code>KNOB_MAX</code></td>
+<td><code>20</code></td>
+<td>The most knob steps in one <code>KEY</code>.</td>
+</tr>
+<tr>
+<td><code>LAST_CODE</code></td>
+<td><code>21</code></td>
+<td>The last keypad code (stock's 0-21); 24 up are the PTTs, never keys here.</td>
+</tr>
+<tr>
+<td><code>PTT</code></td>
+<td><code>0x80</code></td>
+<td>Remote PTT (LINK-20). Actions <code>ON</code> (then the slot), <code>ALIVE</code>, <code>OFF</code>.</td>
+</tr>
+<tr>
+<td><code>OFF</code></td>
+<td><code>0</code></td>
+<td>Unkey: always <code>ok</code>, keyed or not, so a PC can send it whatever happened.</td>
+</tr>
+<tr>
+<td><code>ON</code></td>
+<td><code>1</code></td>
+<td>Key up, with every transmit check a PTT press has; then a byte: the slot (<code>ACTIVE</code>, or 0-2 for A-C). <code>ok</code> and the slot keyed, or <code>invalid</code> and the reason as text.</td>
+</tr>
+<tr>
+<td><code>ALIVE</code></td>
+<td><code>2</code></td>
+<td>Keepalive: at least every <code>KEEPALIVE_MS</code> or the radio unkeys (no keepalive, no transmit). <code>ok</code> while keyed; <code>invalid</code> and why it ended once it has.</td>
+</tr>
+<tr>
+<td><code>ACTIVE</code></td>
+<td><code>0xFF</code></td>
+<td>The slot byte for "the active slot", as PTT A and the side connector key it (KEY-7).</td>
+</tr>
+<tr>
+<td><code>KEEPALIVE_MS</code></td>
+<td><code>2000</code></td>
+<td>No keepalive for this long, and the radio unkeys (LINK-20).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="what"><code>what</code></h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SETTINGS</code></td>
+<td><code>1</code></td>
+<td>The radio-wide settings, one record (index 0).</td>
+</tr>
+<tr>
+<td><code>CHANNEL</code></td>
+<td><code>2</code></td>
+<td>A channel by number, 0-999.</td>
+</tr>
+<tr>
+<td><code>ZONE</code></td>
+<td><code>3</code></td>
+<td>A zone by number.</td>
+</tr>
+<tr>
+<td><code>PRESET</code></td>
+<td><code>4</code></td>
+<td>A range preset by number.</td>
+</tr>
+<tr>
+<td><code>APRS</code></td>
+<td><code>5</code></td>
+<td>The APRS settings, one record (index 0; LINK-43): MENU 0 5's that aren't in the settings record.</td>
+</tr>
+<tr>
+<td><code>CONTACT</code></td>
+<td><code>6</code></td>
+<td>An APRS contact, in callsign order (APRS-42): written by callsign whatever the index.</td>
+</tr>
+<tr>
+<td><code>POSITION</code></td>
+<td><code>7</code></td>
+<td>A channel's position by channel number, 0-999 (LINK-53, decision 325): latitude and longitude (i32 each, little-endian, 1e-7 degree, north and east positive), 8 bytes. <code>READ_MANY</code> gives only the channels that have one; a <code>WRITE_MANY</code> record of length 0 clears it. Only from radios that say <code>super::caps::POSITION</code>.</td>
+</tr>
+<tr>
+<td><code>QUICK</code></td>
+<td><code>8</code></td>
+<td>A quick message, 0-8 (LINK-54, TEXT-7): flags (bit 0 <code>super::QUICK_OWN</code>: the owner's own text; clear: the factory text), then the text (0-67 bytes). Only from radios that say <code>super::caps::LISTS</code>.</td>
+</tr>
+<tr>
+<td><code>WAYPOINT</code></td>
+<td><code>9</code></td>
+<td>A waypoint, newest first, 0-255 (LINK-55, GPS-10): name (16 bytes, 0-padded), latitude and longitude (i32 each, 1e-7 degree), source (u8: 0 marked, 1 APRS, 2 link, 3 grid): <code>super::WAYPOINT_LEN</code> bytes. A <code>WRITE_MANY</code> record replaces the waypoint at its index, adds one at <code>super::ADD</code>, deletes with length 0.</td>
+</tr>
+<tr>
+<td><code>DTMF</code></td>
+<td><code>10</code></td>
+<td>A DTMF memory, 0-15 (LINK-56, DTMF-12): the symbols (length u8, then 1-16 of <code>0-9 A-D * #</code>), then the name (the rest, 0-10 bytes). Only the memories set are listed; a record of length 0 clears one.</td>
+</tr>
+<tr>
+<td><code>PRESET_SKIPS</code></td>
+<td><code>11</code></td>
+<td>A range preset's skipped frequencies (LINK-58, SCAN-10), by the preset's index (as <code>PRESET</code>): u32 each, 10 Hz, 0-48 of them. <code>READ_MANY</code> lists the presets that have any; a <code>WRITE_MANY</code> record replaces the list (length 0 clears it). Only from radios that say <code>super::caps2::PRESET_SKIPS</code>.</td>
+</tr>
+<tr>
+<td><code>SAT</code></td>
+<td><code>12</code></td>
+<td>A satellite, 0-31 (LINK-63, SAT-2): the record of <code>ferrite_core::sat::wire</code> (<code>super::SAT_LEN</code> bytes: status, flags, transponders used, catalogue number, name, elements, five transponders). <code>READ_MANY</code> lists the ones held; a <code>WRITE_MANY</code> record replaces the satellite at its index (the per-satellite choices stay with its catalogue number), length 0 deletes it, and length 0 at <code>super::ADD</code> deletes them all (one rewrite of the region, so the whole list's writes after it only program erased bytes). A transponder outside 144-148 or 430-440 MHz is refused (<code>invalid</code>, SAT-13).</td>
+</tr>
+<tr>
+<td><code>SAT_INFO</code></td>
+<td><code>13</code></td>
+<td>The satellites' info, index 0 (LINK-64, SAT-18, SAT-21): declination (i16, 0.1 degree, east positive, 0x7FFF none), 2 bytes 0, the satellite data's build time (u32, UTC seconds), when Console wrote it (u32), 4 bytes 0: <code>super::SAT_INFO_LEN</code> bytes.</td>
+</tr>
+<tr>
+<td><code>RADIO</code></td>
+<td><code>14</code></td>
+<td>The radio's own state the settings record doesn't hold, index 0 (LINK-66, decision 347): Watch (0 1 1: 0-2), Battery Save (0 7 7 1: 0-3), the GPS fix (0 none, 2 2D, 3 3D; read only), the message sound (0 7 5 5: an index into <code>tonegen::CHIMES</code>), latitude and longitude (i32 each, 1e-7 degree, north and east positive; the fixed position when there is no fix and it is on, GPS-3), the fix's age in seconds (u16, 0xFFFF none): <code>super::RADIO_LEN</code> bytes. A write takes Watch and Battery Save, and the message sound when it is 4 bytes or more, each as the menu changes it; the fix and position are ignored. Only from radios that say <code>super::caps2::RADIO</code>.</td>
+</tr>
+</tbody>
+</table></div><p class="gen"><small>Made from <code>docs/manual/G-link-protocol.md</code>, <code>ferrite/crates/ferrite-core/src/link.rs</code> by docs/tools/mkdev.py.</small></p>
+</div>
+</div>
+{% endraw %}

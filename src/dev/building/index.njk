@@ -1,0 +1,110 @@
+---
+layout: layouts/base.njk
+title: "Building and flashing · Developers"
+description: "The workspace, the tests, the images and their build features, and flashing a radio."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>Building and flashing Ferrite</h1><p class="lead">The workspace, the tests, the images and their build features, and flashing a radio.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/">Overview</a> <a href="/dev/building/" class=on aria-current=page>Building</a> <a href="/dev/link-protocol/">Link protocol</a> <a href="/dev/update-file/">Update file</a> <a href="/dev/codeplug/">Codeplug format</a> <a href="/dev/terminal-pages/">Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>Ferrite is Rust, <code>no_std</code>, for the RT-950 Pro's AT32F403A (Cortex-M4F). Everything below runs from the
+<code>ferrite/</code> checkout.</p>
+<h2 id="what-you-need">What you need</h2>
+<ul>
+<li>Rust with the <code>thumbv7em-none-eabihf</code> target (the toolchain is pinned in <code>rust-toolchain.toml</code>).</li>
+<li>Python 3 for the tools in <code>tools/</code> (<code>pyserial</code> for the cable).</li>
+<li>The programming cable (a CH340 USB serial adapter; it shows as <code>/dev/cu.usbserial-*</code> on a Mac).</li>
+</ul>
+<h2 id="the-workspace">The workspace</h2>
+<ul>
+<li><code>firmware/</code>: the radio's binary: the HAL, the tasks (<code>src/tasks/radio/</code> is the Radio task) and the board.</li>
+<li><code>crates/ferrite-core</code>: pure logic, tested on the host (frequencies, the link's wire format, the SPI layout,
+  satellites, the parts).</li>
+<li><code>crates/ferrite-ui</code>: drawing (canvas, fonts, widgets).</li>
+<li><code>crates/ferrite-app</code>: the screens, the terminal (<code>src/term/</code>) and the link session (<code>src/link.rs</code>).</li>
+<li><code>crates/ferrite-store</code>: the SPI flash store.</li>
+<li><code>crates/ferrite-radio</code>: the chips' register recipes.</li>
+<li><code>drivers/</code>: BK4829, SI4732, ST7789, W25Q, keypad, NMEA.</li>
+<li><code>digimodes/</code>: the AFSK, FX.25, POCSAG and DSC decoders.</li>
+<li><code>sim/</code>, <code>sim-web/</code>: the simulator (a window, headless for tests, and the browser build).</li>
+</ul>
+<h2 id="tests">Tests</h2>
+<pre><code class="language-sh">cargo test                                   # every host test
+cargo test -p ferrite-app --no-default-features
+cargo clippy --all-targets -- -D warnings
+cargo fw-clippy -- -D warnings               # the firmware target
+</code></pre>
+<p>The UI tests drive the simulator through the link, as Console does:
+<code>python3 tools/uitest.py --sim auto -j 20</code>.</p>
+<h2 id="images">Images</h2>
+<pre><code class="language-sh">tools/mkbtf.sh tx          # the user build: target/ferrite-tx.btf and target/ferrite-tx.ffw
+tools/mkbtf.sh tx-bench    # tx with the bench commands, the cable log and the line commands; Dry TX on at power-on
+tools/mkbtf.sh tx no-vt100 # without the terminal's full-screen pages
+</code></pre>
+<p>Each build also packs the update file, <code>.ffw</code> (<a href="/dev/update-file/">the update file</a>): the <code>.btf</code> plus the SPI
+parts. <code>tools/slowcheck.py</code> runs with every build and must say ok (what has to stay in zero-wait flash).</p>
+<p>Build features worth knowing:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>In</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tx</code></td>
+<td>tx, tx-bench</td>
+<td>Transmit. Without it the image has no transmit code at all.</td>
+</tr>
+<tr>
+<td><code>bench</code></td>
+<td>tx-bench, bring-up</td>
+<td>Raw chip and memory access, test tones, the cable log, the line commands.</td>
+</tr>
+<tr>
+<td><code>vt100</code></td>
+<td>default</td>
+<td>The terminal's full-screen pages (an interpreter; the pages are an SPI part).</td>
+</tr>
+<tr>
+<td><code>line-cmds</code></td>
+<td>bench</td>
+<td>The terminal's command line and <code>CMD</code> over the link. A user build has none: Console uses the binary records.</td>
+</tr>
+<tr>
+<td><code>cable-log</code></td>
+<td>bench</td>
+<td>The plain log on the cable at power-on. A user build prints only a fault's report.</td>
+</tr>
+<tr>
+<td><code>sat-predict</code></td>
+<td>default</td>
+<td>Satellite pass prediction on the radio.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="flashing">Flashing</h2>
+<pre><code class="language-sh">python3 tools/flash.py /dev/cu.usbserial-XXXX target/ferrite-tx.ffw --backup FLASH.BIN --dev-unsigned
+</code></pre>
+<ul>
+<li><code>--backup</code> is the radio's own SPI flash backup (calibration included), made before the first install. The tool
+  refuses without it.</li>
+<li>A local build is unsigned; releases are signed in CI, and only a signed file installs without <code>--dev-unsigned</code>.</li>
+<li>The MCU image goes in through the stock bootloader; then the SPI parts go over the link's raw writes, each read
+  back by CRC; then the radio restarts with them.</li>
+<li>Never written, whatever any file says: the factory calibration (0x00F000-0x00FFFF), the bootloader's update area
+  (0x300000 up) and the MCU's option bytes.</li>
+</ul>
+<h2 id="talking-to-the-radio">Talking to the radio</h2>
+<ul>
+<li><code>tools/ferrite_link.py PORT hello | ui | heard | log | slot ...</code> speaks the <a href="/dev/link-protocol/">link protocol</a>.</li>
+<li><code>tools/term.py</code> opens the cable terminal (the full-screen pages).</li>
+<li>Ferrite Console is the programming app: channels, settings, backups, updates (the same link).</li>
+</ul><p class="gen"><small>Made from <code>docs/dev/building.md</code> by docs/tools/mkdev.py.</small></p>
+</div>
+</div>
+{% endraw %}

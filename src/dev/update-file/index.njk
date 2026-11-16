@@ -1,0 +1,83 @@
+---
+layout: layouts/base.njk
+title: "Update file · Developers"
+description: "One file per update: the firmware image and its SPI flash parts, signed."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>The update file (<code>.ffw</code>)</h1><p class="lead">One file per update: the firmware image and its SPI flash parts, signed.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/">Overview</a> <a href="/dev/building/">Building</a> <a href="/dev/link-protocol/">Link protocol</a> <a href="/dev/update-file/" class=on aria-current=page>Update file</a> <a href="/dev/codeplug/">Codeplug format</a> <a href="/dev/terminal-pages/">Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>Ferrite's update file, <code>.ffw</code> (decision 335; manual UPD-20 - UPD-24): one file per update.</p>
+<pre><code class="language-sh">    python3 tools/ffw.py pack OUT.ffw --btf target/ferrite-tx.btf --parts target/parts --kind tx
+    python3 tools/ffw.py check FILE.ffw [--dev-unsigned]   # the installers' checks, nothing written
+    python3 tools/ffw.py manifest FILE.ffw &gt; manifest.json  # the bytes the release key signs
+    python3 tools/ffw.py add-sig FILE.ffw manifest.minisig  # put the signature in (CI)
+    python3 tools/ffw.py build-id IMAGE.bin                 # the build ID a firmware image carries
+</code></pre>
+<p>The file is a zip. Its first entry, stored uncompressed, is <code>manifest.json</code> (format <code>ferrite-update-1</code>): the build
+ID, version, model, build kind, the SPI flash layout it needs, and every file with its size, SHA-256 and target
+(<code>mcu</code> for <code>firmware.btf</code>; <code>spi</code> with the address and the most it may take for each <code>spi/</code> part). Then
+<code>manifest.minisig</code> when signed (the release key's minisign signature over the manifest's bytes), <code>firmware.btf</code>
+(the MCU image as today: another flasher can still take it out) and the <code>spi/</code> parts. Every entry is stored, so any
+zip reader, a browser's included, opens it without inflating.</p>
+<p>Installing (<code>flash.py</code>, Console): the signature and every hash are checked first; an unsigned file only with an
+explicit developer flag (<code>--dev-unsigned</code>). Then the backup as today, the MCU flashed, then the SPI parts over the
+link's raw write (LINK-60). A part aimed at calibration (0x00F000-0x00FFFF), the update area (0x300000 up), the
+layout header or the migration mark, or outside the layout 3 region parts may use, is refused whatever the manifest
+says (UPD-24).</p>
+<h2 id="spi-parts">SPI parts</h2>
+<p>SPI parts (decision 335, UPD-20 – UPD-23): data the firmware keeps on the SPI flash instead of its own, installed
+from the <code>.ffw</code> update file with every update (the text pack, the terminal's page templates, the boot logo, predictive text's words).</p>
+<p>Each part starts with a 32-byte header (little-endian):</p>
+<pre><code class="language-text">magic [4] | format u16 (1) | reserved u16 | build [16] (the build ID, SELF-5, NUL-padded) | len u32 (the body's
+bytes) | crc u32 (CRC-32 of the body, zlib's)
+</code></pre>
+<p>then its body. The firmware uses a part only when the header is its kind's, the build ID is its own
+([<code>crate::BUILD</code>]) and the CRC holds ([<code>mount</code>], once at power-on); otherwise every user of it falls back (a
+short built-in message, the plain command line, the wordmark without its logo).</p>
+<p>Who reads the chip: the firmware sets [<code>set_reader</code>] once its store is made (reads straight from the W25Q, a
+program or erase suspended meanwhile); the simulator sets one over the part files it was given. With no reader,
+a host build (tests, the simulators by default) uses the parts built into it, so goldens keep the full text.</p>
+<h3 id="the-parts-this-firmware-has">The parts this firmware has</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Magic</th>
+<th>File</th>
+<th>SPI flash</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FTXT</code></td>
+<td><code>text-en.bin</code></td>
+<td>0x090000-0x09FFFF (64 KB)</td>
+<td>The English text pack: layout 3's text region (64 KB at 0x090000).</td>
+</tr>
+<tr>
+<td><code>FLGO</code></td>
+<td><code>logo.bin</code></td>
+<td>0x240000-0x247FFF (32 KB)</td>
+<td>The boot logo's two masks: the first 32 KB of layout 3's boot screens region.</td>
+</tr>
+<tr>
+<td><code>FVTP</code></td>
+<td><code>term-vt.bin</code></td>
+<td>0x248000-0x24FFFF (32 KB)</td>
+<td>The terminal's page templates (TERM-47): the next 32 KB of the boot screens region.</td>
+</tr>
+<tr>
+<td><code>FDIC</code></td>
+<td><code>words-en.bin</code></td>
+<td>0x0B0000-0x0BFFFF (64 KB)</td>
+<td>Predictive text's words (decision 345): layout 3's dictionary region (64 KB at 0x0B0000).</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <a href="/dev/flash-map.html">SPI flash map</a> shows where the regions sit.</p><p class="gen"><small>Made from <code>ferrite/tools/ffw.py</code>, <code>ferrite/crates/ferrite-core/src/part.rs</code>, <code>ferrite/crates/ferrite-core/src/layout.rs</code> by docs/tools/mkdev.py.</small></p>
+</div>
+</div>
+{% endraw %}

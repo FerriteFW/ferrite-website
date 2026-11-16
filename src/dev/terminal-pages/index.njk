@@ -1,0 +1,108 @@
+---
+layout: layouts/base.njk
+title: "Terminal pages · Developers"
+description: "The small stack language the cable terminal's full-screen pages are written in."
+---
+{% raw %}
+<div class="wrap column">
+<header class="page-head"><p class="kicker">Developers</p><h1>The terminal's pages</h1><p class="lead">The small stack language the cable terminal&#x27;s full-screen pages are written in.</p></header>
+<nav class="devnav" aria-label="Developer pages"><a href="/dev/">Overview</a> <a href="/dev/building/">Building</a> <a href="/dev/link-protocol/">Link protocol</a> <a href="/dev/update-file/">Update file</a> <a href="/dev/codeplug/">Codeplug format</a> <a href="/dev/terminal-pages/" class=on aria-current=page>Terminal pages</a> <a href="/dev/flash-map.html">SPI flash map</a></nav>
+<div class="prose">
+
+<p>The cable terminal's full-screen pages are a program in a small stack language, compiled into an SPI part and run by an interpreter in the firmware (manual TERM-47). What follows is the language's own description, from the program's source.</p>
+<p>The terminal's full-screen pages (TERM-11 to TERM-20, TERM-47; decision 346): a small stack language that <code>build.rs</code> compiles into the template pack, the program <code>term::tpl</code> runs from the SPI part. Everything a page shows and does is here: the text, layout, list rows, hints, help, what each key does, the channel list's tools. The firmware keeps the interpreter and the natives listed below (a value, a channel's field, a setting by its menu number, the radio's formatters, a write through the App). The byte format is described in <code>term/tpl.rs</code>.</p>
+<p>Words run left to right on a stack of 32-bit numbers. A string "..." prints itself (\" \ \n \xNN; columns counted, clipped at the row's width); <code>raw "..."</code> sends an escape sequence; <code>bold "..."</code> prints in bold; <code>pick "a|b|c"</code> prints piece i (i on the stack). <code>@x</code> pushes variable x, <code>!x</code> stores into it: <code>vars</code> keep their values (16 bits: a zone is -3 for every channel, -1 for none), <code>locals</code> last one run. <code>: name ... ;</code> defines a word (in the lib before the first page, else in that page; <code>( ... )</code> is a comment). <code>if ... else ... then</code>, <code>begin ... while ... repeat</code>, <code>begin ... until</code>, <code>exit</code>. Numbers (16-bit literals): 12, -1, 0x1F, 'c'; <code>const</code> names one. <code>.</code> prints a number, <code>.r</code> / <code>.z</code> (n width) padded with spaces / zeros; <code>at</code> (col) moves right with spaces. <code>\</code> alone starts a comment; a line starting with # is one.</p>
+<p>A page: <code>hints "Key=What|..."</code>, <code>help "line\nline"</code>, rules for its body rows (body row 0 is the line under the top line; the first rule that takes a row draws it, run with <code>@i</code> the row in a list):</p>
+<pre><code>row N CODE         that row
+bot K CODE         K rows above the hints line's row (body - K, body = rows - 2)
+list N COUNT CODE  rows N.. for COUNT's count
+tail K CODE        K rows after the last list's end
+pre CODE           runs before the rules (exit: a blank row)
+</code></pre>
+<p>and its keys: <code>key KEY CODE</code> (KEY up down left right pgup pgdn home end enter esc line lesc digit, or "c"; letters come lower case; a digit's CODE gets the key on the stack), <code>key pre CODE</code> first (the key on the stack), <code>key else CODE</code> for any other. <code>: prep ... ;</code> runs before each redraw, <code>: poll ... ;</code> each poll while @busy isn't 0. A page is read from the SPI flash with the lib, through a small window each (tpl::Code); a key or a poll that sets <code>!chain</code> to another page runs that page's key or poll next (the channel list's tools are one). The pages' order is term::Page's (a page only chained to comes after them).</p>
+<h2 id="natives">Natives</h2>
+<p>What the firmware gives the program, by how many numbers each takes from the stack and gives back.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Takes</th>
+<th>Gives</th>
+<th>Natives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>1</td>
+<td><code>rows</code> <code>cols</code> <code>colour</code> <code>bt</code> <code>pin</code> <code>pinn</code> <code>cmdon</code> <code>bnote</code> <code>warn</code> <code>noteon</code> <code>typing</code> <code>lnum</code> <code>hascall</code> <code>ssb</code> <code>txbuilt</code> <code>clock</code> <code>battmv</code> <code>gps</code> <code>gpsph</code> <code>gpss</code> <code>btdev</code> <code>bsave</code> <code>count</code> <code>zones</code> <code>cedit</code> <code>radioch</code> <code>homech</code> <code>nmarks</code> <code>active</code> <code>nev</code></td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td><code>cmdtail</code> <code>cmdopen</code> <code>note</code> <code>noteclr</code> <code>cap</code> <code>lname</code> <code>lstop</code> <code>line</code> <code>lfind</code> <code>find</code> <code>version</code> <code>callsign</code> <code>region</code> <code>cal</code> <code>eset</code> <code>eclr</code> <code>eload</code> <code>cmode</code> <code>ctone</code> <code>cput</code> <code>unmark</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td><code>say</code> <code>lstart</code> <code>zname</code> <code>mhz</code> <code>freq3</code> <code>citem</code> <code>cdel</code> <code>cren</code> <code>ftext</code> <code>flabel</code> <code>cname</code> <code>gname</code> <code>gdesc</code> <code>slotmode</code> <code>slottone</code> <code>rssi</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td><code>capcmp</code> <code>evago</code> <code>zlen</code> <code>cget</code> <code>cf</code> <code>newch</code> <code>mark</code> <code>nextmark</code> <code>prevmark</code> <code>markbelow</code> <code>slotch</code> <code>aprs</code> <code>slotf</code> <code>slotoff</code> <code>sq</code> <code>scanning</code> <code>livef</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td><code>cset</code> <code>markset</code> <code>ev</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td><code>cat</code> <code>room</code> <code>isub</code> <code>nitems</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td><code>iname</code> <code>ihelp</code> <code>ival</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td><code>fchg</code> <code>sreset</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td><code>seek</code> <code>schg</code></td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td><code>lmhz</code></td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td><code>scan</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td><code>nlist</code> <code>gpsl</code> <code>devv</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td><code>quick</code> <code>aprsdo</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td><code>sapply</code> <code>litem</code></td>
+</tr>
+</tbody>
+</table></div><p class="gen"><small>Made from <code>ferrite/crates/ferrite-app/src/term/pages.vt</code> by docs/tools/mkdev.py.</small></p>
+</div>
+</div>
+{% endraw %}
