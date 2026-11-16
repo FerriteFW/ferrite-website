@@ -64,3 +64,8 @@ Posts we want to write, roughly in no order. A post starts as a `draft: true` fi
   shared code (`tools/sizemap.py`, `tools/slowcheck.py`, the build report). Today's tx image: about 712 KB, fast
   flash 115 of 244 KB. Sources: CLAUDE.md "Size and speed", `ferrite/.cargo/config.toml`,
   `docs/research/flash-audit-oct27.md`, `docs/archive/fw-rs-size-comparison.md`.
+- **Failing gracefully.** What Ferrite does when something goes wrong: no heap, so no running out of memory mid
+  key-up; `unsafe` register code fenced into the HAL and start-up, each block saying why it's sound; a panic compiles
+  to one trap instruction, the fault handler puts the radio in a safe state with the transmitter off; the fault's
+  address kept for the cable log; watchdogs and timeouts on transmit. Sources: `docs/firmware-design.md`, the TX and
+  fault rules in `docs/manual/`, `docs/archive/fw-rs-size-comparison.md` (panics).
