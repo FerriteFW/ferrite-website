@@ -43,7 +43,7 @@ export default {
 
   // Visit counts: the GoatCounter code (CODE.goatcounter.com). Empty: no counting script. Cookieless, nothing
   // personal kept; the counts (per page, blog posts included) are in GoatCounter's dashboard, not on the site.
-  goatcounter: "",
+  goatcounter: "ferritefw",
 
   // Releases. Set `released` once the first release is out; until then the download page says "Coming soon."
   // (No version numbers on public pages.)
