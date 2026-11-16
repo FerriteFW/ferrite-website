@@ -41,6 +41,10 @@ export default {
   SUPPORT_URL: "", // the donation link: the Donations section shows once it is set
   CONTACT: "", // the manufacturers' contact (an email address)
 
+  // Visit counts: the GoatCounter code (CODE.goatcounter.com). Empty: no counting script. Cookieless, nothing
+  // personal kept; the counts (per page, blog posts included) are in GoatCounter's dashboard, not on the site.
+  goatcounter: "",
+
   // Releases. Set `released` once the first release is out; until then the download page says "Coming soon."
   // (No version numbers on public pages.)
   release: {
