@@ -38,10 +38,9 @@ One Markdown file per post in `src/blog/posts/`. See [POSTING.md](POSTING.md). I
 - `npm run videos` makes them from `ferrite/target/promo/` (render with `tools/promo/mkvideo.py` first; needs ffmpeg and ImageMagick): H.264 1280x720 (CRF 26), no audio, faststart. Posters are the screen alone, cut from one frame of each source; `npm run videos -- --posters` remakes only those, `POSTER_<name>=SECONDS` moves one.
 - All encodes are committed (Pages serves them).
 
-## Deploy plan (not set up yet)
+## Deploy (by hand, since 0.9.0)
 
-- `dist/www/` goes to this repo's GitHub Pages (FerriteFW/ferrite-website), served at ferritefw.dev.
-- `dist/blog/` goes to a separate Pages repo (to be made), served at blog.ferritefw.dev.
-- console.ferritefw.dev (Ferrite Console) and manual.ferritefw.dev (the user guide, from `docs/tools/mkguide.py`) are built elsewhere.
-- Later: a Forgejo CI job or a GitHub Action runs `npm ci && npm run build` and pushes each `dist/` folder to its repo's Pages branch. Each folder has its `CNAME` and `.nojekyll` already.
+- `npm run build`, then `dist/www/` is force-pushed to this repo's `gh-pages` branch (Pages: ferritefw.dev) and `dist/blog/` to FerriteFW/blog's `main` (blog.ferritefw.dev). Each folder has its `CNAME` and `.nojekyll`.
+- console.ferritefw.dev is the web Console, from the console repo's `gh-pages` branch.
+- `src/releases/`: Console's update feed, `latest.json` and the `.ffw` it names (`console/tools/release-files.mjs`); replace both at each release.
 - DNS is at Cloudflare.
