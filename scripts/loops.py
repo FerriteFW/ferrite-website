@@ -3,7 +3,7 @@
 
 Each chapter is a key script played on the sample radio by ferrite's recorder (ferrite-sim-record, the same one
 tools/promo/mkvideo.py uses). Only the 240 x 320 screen is recorded: no captions, keycaps, music or front panel.
-Writes src/loops/NAME.mp4 (H.264 480 x 640, muted, no audio track) and NAME.webp (the first frame, the poster).
+Writes src/loops/NAME.mp4 (H.264 960 x 1280, 4x with square pixels, muted, no audio track) and NAME.webp (the first frame, the poster).
 
     npm run loops            # all chapters
     npm run loops -- scope   # only these
@@ -66,9 +66,9 @@ def main():
             raw = tmp / "frames" / "00.rgb"
             mp4, webp = OUT / f"{name}.mp4", OUT / f"{name}.webp"
             src = ["-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-framerate", str(FPS_IN), "-i", str(raw)]
-            scale = f"scale={W * 2}:{H * 2}:flags=neighbor"
+            scale = f"scale={W * 4}:{H * 4}:flags=neighbor"  # 4x: the page shrinks it a little rather than stretching it
             run("ffmpeg", "-v", "error", "-y", *src, "-vf", f"fps={FPS_OUT},{scale},format=yuv420p", "-an",
-                "-c:v", "libx264", "-preset", "veryslow", "-tune", "animation", "-crf", "20",
+                "-c:v", "libx264", "-preset", "veryslow", "-tune", "animation", "-crf", "18",
                 "-movflags", "+faststart", str(mp4))
             png = tmp / "poster.png"
             run("ffmpeg", "-v", "error", "-y", *src, "-frames:v", "1", "-vf", scale, str(png))

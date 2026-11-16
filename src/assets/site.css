@@ -219,12 +219,10 @@ pre.wrapcode { white-space: pre-wrap; word-break: break-all; }
   .chapter { min-height: 80vh; }
   .hero-copy { min-height: calc(100vh - 60px); justify-content: center; padding-top: 0; }
 }
-/* At exactly 2x (a tall enough window), keep the screen's pixels square. */
-@media (min-width: 900px) and (min-height: 760px) { .story-frame .layer { image-rendering: pixelated; } }
 /* Without JavaScript: no pinned screen; each chapter shows its own still. */
 html:not(.js) .story-screen { display: none; }
 html:not(.js) .chapter { min-height: 0; padding: 40px 0; }
-html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-radius: 8px; margin-bottom: 20px; image-rendering: pixelated; }
+html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-radius: 8px; margin-bottom: 20px; }
 @media (prefers-reduced-motion: reduce) { .story-frame .layer { transition: none; } }
 
 /* Home's end: a closing line and the buttons, in the story's black space. */
