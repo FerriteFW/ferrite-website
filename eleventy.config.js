@@ -19,6 +19,8 @@ export default function (eleventyConfig) {
     "src/manual": "manual", // the user guide and its two sheets, as docs/tools/mkguide.py makes them
     // Ferrite Pocket's share links (/s#...) open the app: Apple's app-site association, JSON with no extension
     "src/.well-known": ".well-known",
+    // Console's update feed (UPD-25): latest.json and the .ffw it names, from console/tools/release-files.mjs
+    "src/releases": "releases",
   });
   eleventyConfig.ignores.add("src/dev/flash-map.html");
   eleventyConfig.ignores.add("src/manual/**");
