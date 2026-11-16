@@ -227,17 +227,15 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 
 .watch { padding-top: 64px; max-width: 960px; }
 .watch h2 { font-size: 13px; font-family: var(--mono); font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sub); margin-bottom: 20px; }
-.tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px 24px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 640px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: 56px; grid-template-columns: minmax(0, 1fr); }
 .tile { display: block; color: var(--text); text-decoration: none; }
 .tile-media { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--panel); }
-.tile-media img { display: block; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: filter 0.2s; }
-.tile:hover .tile-media img, .tile:focus-visible .tile-media img { filter: brightness(0.9); }
-.play { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(7, 8, 10, 0.6); border: 1px solid rgba(230, 232, 235, 0.35); }
-.play::after { content: ""; position: absolute; left: 22px; top: 18px; border-style: solid; border-width: 10px 0 10px 16px; border-color: transparent transparent transparent var(--text); }
+.tile-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.play { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(7, 8, 10, 0.6); border: 1px solid rgba(230, 232, 235, 0.35); }
+.play::after { content: ""; position: absolute; left: 25px; top: 21px; border-style: solid; border-width: 11px 0 11px 18px; border-color: transparent transparent transparent var(--text); }
 .tile:hover .play { border-color: var(--blue); }
 .tile-video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; background: #000; }
-.tile-title { display: block; margin-top: 10px; font-size: 14px; }
+.tile-title { display: block; margin-top: 12px; font-size: 15px; }
 .tile-len { color: var(--dim); }
 .watch .more { margin: 28px 0 0; font-size: 14px; }
 .watch .more a { color: var(--sub); }
