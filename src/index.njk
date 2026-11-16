@@ -21,11 +21,6 @@ chapters:
   - id: lowpower
     title: "Low Power Mode"
     text: "One switch keeps only what you need to talk on one frequency. Hold SIDE1 and SIDE2 to get everything back."
-videos:
-  - { file: tour, title: "The tour", length: "1:48" }
-  - { file: unique, title: "What only Ferrite does", length: "1:31" }
-  - { file: aprs, title: "APRS on the radio", length: "1:58" }
-  - { file: lowpower, title: "Low Power Mode", length: "0:49" }
 ---
 <script>document.documentElement.classList.add("js")</script>
 <section class="story wrap">
@@ -58,17 +53,18 @@ videos:
   </div>
 </section>
 
-<section class="wrap watch" aria-labelledby="watch">
-  <h2 id="watch">Watch</h2>
-  <ul class="tiles">
-    {%- for v in videos %}
-    <li>
-      <a class="tile" href="/video/{{ v.file }}.mp4" data-video="/video/{{ v.file }}.mp4">
-        <span class="tile-media"><img src="/video/{{ v.file }}.jpg" alt="" width="1280" height="720" loading="lazy"><span class="play" aria-hidden="true"></span></span>
-        <span class="tile-title">{{ v.title }} <span class="tile-len">· {{ v.length }}</span></span>
-      </a>
-    </li>
-    {%- endfor %}
-  </ul>
+{%- set v = videos[0] %}
+<section class="wrap tour" aria-label="{{ v.title }}">
+  {% include "video-tile.njk" %}
+  <p class="tour-line">A walk through the radio on Ferrite, on the firmware's own screens.</p>
+</section>
+
+<section class="wrap closing">
+  <h2>Built from scratch for the <span class="nowrap">RT-950 Pro.</span></h2>
+  <div class="actions">
+    <a class="btn solid" href="/features/">See what it does</a>
+    <a class="btn" href="/download/">Download</a>
+  </div>
 </section>
 <script src="/assets/home.js" defer></script>
+<script src="/assets/video.js" defer></script>

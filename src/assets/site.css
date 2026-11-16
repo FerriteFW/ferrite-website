@@ -225,8 +225,13 @@ html:not(.js) .chapter { min-height: 0; padding: 40px 0; }
 html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-radius: 8px; margin-bottom: 20px; image-rendering: pixelated; }
 @media (prefers-reduced-motion: reduce) { .story-frame .layer { transition: none; } }
 
-.watch { padding-top: 64px; max-width: 960px; }
-.watch h2 { font-size: 13px; font-family: var(--mono); font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sub); margin-bottom: 20px; }
+.watch .tiles { max-width: 960px; }
+/* Home after the story: the tour, then a closing line. Same black space as the chapters. */
+.tour { max-width: 1024px; padding-top: 18vh; }
+.tour-line { color: var(--sub); margin: 6px 0 0; font-size: 15px; }
+.closing { padding: 22vh 0 4vh; text-align: center; }
+.closing h2 { font-size: clamp(28px, 4.6vw, 44px); }
+.closing .actions { justify-content: center; margin-top: 28px; }
 .tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: 56px; grid-template-columns: minmax(0, 1fr); }
 .tile { display: block; color: var(--text); text-decoration: none; }
 .tile-media { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--panel); }
@@ -237,6 +242,4 @@ html:not(.js) .ch-poster { display: block; width: 240px; height: 320px; border-r
 .tile-video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; background: #000; }
 .tile-title { display: block; margin-top: 12px; font-size: 15px; }
 .tile-len { color: var(--dim); }
-.watch .more { margin: 28px 0 0; font-size: 14px; }
-.watch .more a { color: var(--sub); }
-.watch .more a::after { content: " →"; }
+.nowrap { white-space: nowrap; }
