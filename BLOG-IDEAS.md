@@ -69,3 +69,8 @@ Posts we want to write, roughly in no order. A post starts as a `draft: true` fi
   to one trap instruction, the fault handler puts the radio in a safe state with the transmitter off; the fault's
   address kept for the cable log; the transmit timeout. Sources: `docs/firmware-design.md`, the TX and
   fault rules in `docs/manual/`, `docs/archive/fw-rs-size-comparison.md` (panics).
+- **Ferrite by the numbers.** The measured results that were on the Features page (cut Oct 29, Alex: features are
+  for the cool features, numbers go in a blog post): resting current 64.7 vs 18.6 mA (107 h), APRS decoding against
+  Dire Wolf off the air and on the WA8LMF CD (and the published "Battle of the TNCs" table), transmit power level by
+  level against stock. Sources: `docs/showcase/`, `docs/research/tx-power.md`; the cut section is in git
+  (`site-v2`, "Features: the measured section cut to three small tables").
