@@ -1,13 +1,13 @@
 {
  "format": "ferrite-feed-1",
  "ferrite": {
-  "version": "0.9.0",
+  "version": "0.9.3",
   "protocol": 1,
-  "file": "ferrite-0.9.0.ffw",
-  "url": "https://ferritefw.dev/releases/ferrite-0.9.0.ffw",
-  "sha256": "d9e7e400a94dc1d5c6fc600ee5207941134140896c68272ff9bb3ddf4b152db9"
+  "file": "ferrite-0.9.3.ffw",
+  "url": "https://ferritefw.dev/releases/ferrite-0.9.3.ffw",
+  "sha256": "971c05879be194cf46683158d1ee8930139fffdcb61485fb69ce3cae3e4e2ef8"
  },
  "console": {
-  "version": "0.9.2"
+  "version": "0.9.3"
  }
 }
