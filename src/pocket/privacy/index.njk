@@ -1,0 +1,50 @@
+---
+layout: layouts/base.njk
+title: "Ferrite Pocket privacy"
+description: "What Ferrite Pocket, the phone app for Ferrite radios, does with your data: nothing is collected or tracked."
+---
+<div class="wrap column">
+  <header class="page-head">
+    <h1>Ferrite Pocket privacy</h1>
+    <p class="lead">Ferrite Pocket doesn't collect, track or sell anything about you. It has no account, no
+      analytics, no ads and no crash reporting of its own.</p>
+  </header>
+
+  <div class="prose">
+    <h3>Your radio</h3>
+    <p>Pocket talks to your own radio over Bluetooth. What it reads from the radio (channels, stations heard,
+      messages, waypoints) stays on your phone.</p>
+
+    <h3>Your position</h3>
+    <p>Pocket uses your phone's position for the map, distances and satellite passes. While your radio has no GPS
+      fix, Pocket gives it your position over Bluetooth. The radio uses it locally and never sends it out in a
+      beacon. Pocket never sends your position to us or anyone else.</p>
+
+    <h3>Nearby repeaters and airports</h3>
+    <p>Pocket downloads the list for the area you're in from data.ferritefw.dev. The area is a 2-character grid
+      square (about 2,000 by 1,000 km), so the request says only that much about where you are. The request carries
+      no identifier for you or your phone, and we don't log or keep these requests, or tie them to anyone.</p>
+
+    <h3>Satellite data</h3>
+    <p>Pocket downloads the same satellite file for everyone, at most once a day.</p>
+
+    <h3>Hosting</h3>
+    <p>data.ferritefw.dev and ferritefw.dev are static sites hosted on GitHub Pages. GitHub, not Ferrite, runs those
+      servers, and GitHub logs and stores every visitor's IP address for security (see
+      <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#data-collection">About
+      GitHub Pages</a>). We have no access to those logs.</p>
+
+    <h3>Maps</h3>
+    <p>The map is Apple Maps (Google Maps on Android), under Apple's (Google's) own privacy policy.</p>
+
+    <h3>Sharing</h3>
+    <p>A channel or station you share goes where you send it (Messages, Mail, AirDrop). A share link
+      (<code>ferritefw.dev/s#...</code>) carries the channels after the <code>#</code>, which a browser never sends
+      to the server. With Pocket installed, the link opens Pocket and no web page loads. In a browser, the page is
+      counted like the rest of ferritefw.dev with <a href="https://www.goatcounter.com">GoatCounter</a>: no cookies,
+      nothing personal kept, and only the page's address, never the channels.</p>
+
+    <h3>Questions</h3>
+    <p><a href="mailto:privacy@ferritefw.dev">privacy@ferritefw.dev</a></p>
+  </div>
+</div>
