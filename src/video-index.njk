@@ -1,0 +1,7 @@
+---
+permalink: /video/index.json
+eleventyExcludeFromCollections: true
+# The videos for Ferrite Console: its Videos page, and `update`, the one it plays while a firmware update runs.
+# From the same list as /watch/ (src/_data/videos.js); Console fetches it, so a new video needs no new Console.
+---
+{"update": "keys", "videos": {{ videos | dump | safe }}}

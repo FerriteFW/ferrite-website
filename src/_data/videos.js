@@ -1,5 +1,8 @@
-// The full videos on /watch/ (src/video/, made by `npm run videos`).
+// The full videos on /watch/ (src/video/, made by `npm run videos`), and the list Ferrite Console reads
+// (/video/index.json: its Videos page, and `update`, the one it plays while an update runs).
 export default [
+  { file: "keys", title: "Keys worth knowing", length: "1:45",
+    line: "# for help, hold * for the quick menu, * to mute or turn a slot off, and hold # to lock the keys." },
   { file: "launch", title: "Ferrite in 90 seconds", length: "1:29",
     line: "Three slots, the band scope, crossband, APRS messages, shortwave, satellites and Ferrite Console." },
   { file: "tour", title: "The tour", length: "1:48",
