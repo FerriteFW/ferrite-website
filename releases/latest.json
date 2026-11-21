@@ -1,0 +1,13 @@
+{
+ "format": "ferrite-feed-1",
+ "ferrite": {
+  "version": "0.9.5",
+  "protocol": 1,
+  "file": "ferrite-0.9.5.ffw",
+  "url": "https://ferritefw.dev/releases/ferrite-0.9.5.ffw",
+  "sha256": "affc4133b708a41049fe49e2710452e7caf9bec933ac94d4af71a14ecc7cdce2"
+ },
+ "console": {
+  "version": "0.9.5"
+ }
+}

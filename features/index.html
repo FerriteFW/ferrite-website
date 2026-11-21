@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features · Ferrite</title>
+<meta name="description" content="What Ferrite does on the radio today, and the measurements behind it.">
+<meta name="theme-color" content="#07080a">
+<meta property="og:title" content="Features">
+<meta property="og:description" content="What Ferrite does on the radio today, and the measurements behind it.">
+<meta property="og:type" content="website">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="alternate" type="application/atom+xml" title="Ferrite blog" href="https://blog.ferritefw.dev/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="https://ferritefw.dev/"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  <circle cx="60" cy="60" r="38" fill="none" stroke="#9AA3AE" stroke-width="16"/>
+  <g stroke="#4DA3FF" stroke-width="5" stroke-linecap="round">
+    <line x1="43.0" y1="77.0" x2="23.2" y2="96.8"/><line x1="38.1" y1="69.8" x2="12.6" y2="81.3"/>
+    <line x1="36.0" y1="61.4" x2="8.1" y2="63.1"/><line x1="37.1" y1="52.9" x2="10.4" y2="44.5"/>
+    <line x1="41.1" y1="45.2" x2="19.1" y2="27.9"/><line x1="47.6" y1="39.5" x2="33.1" y2="15.5"/>
+    <line x1="55.7" y1="36.4" x2="50.6" y2="8.9"/><line x1="64.3" y1="36.4" x2="69.4" y2="8.9"/>
+    <line x1="72.4" y1="39.5" x2="86.9" y2="15.5"/><line x1="78.9" y1="45.2" x2="100.9" y2="27.9"/>
+    <line x1="82.9" y1="52.9" x2="109.6" y2="44.5"/><line x1="84.0" y1="61.4" x2="111.9" y2="63.1"/>
+    <line x1="81.9" y1="69.8" x2="107.4" y2="81.3"/><line x1="77.0" y1="77.0" x2="96.8" y2="96.8"/>
+  </g>
+</svg>
+<span>Ferrite</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="https://ferritefw.dev/features/" aria-current="page">Features</a></li>
+        <li><a href="https://ferritefw.dev/watch/">Watch</a></li>
+        <li><a href="https://ferritefw.dev/download/">Download</a></li>
+        <li><a href="https://ferritefw.dev/manual/">Manual</a></li>
+        <li><a href="https://ferritefw.dev/bench/">Bench</a></li>
+        <li><a href="https://blog.ferritefw.dev/">Blog</a></li>
+      </ul>
+      <ul class="nav-out">
+        <li><a href="https://console.ferritefw.dev">Console</a></li>
+        <li><a href="https://discord.gg/fYygBVD2Kx">Discord</a></li>
+        <li><a href="https://github.com/FerriteFW/ferrite">Source</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="wrap">
+  <header class="page-head">
+    <h1>Features</h1>
+    <p class="lead">What Ferrite does on the radio today. Every screen here is the firmware's own, drawn from
+      the same code that runs on the radio.</p>
+  </header>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Everyday</p>
+      <h2>Three slots, and watch</h2>
+      <p>The radio has three slots, A, B and C. Each one is on a VFO or a channel. The active slot is the big one;
+        the other two are cards, and the radio keeps listening to them too.</p>
+      <ul>
+        <li><b>Watch</b> listens to two or three slots. The active slot is heard first; the radio never changes it
+          by itself.</li>
+        <li><b>PTT A</b> transmits on the active slot, <b>PTT B</b> always on slot B.</li>
+        <li><b>Mute or turn off</b> a busy slot with <kbd>*</kbd>, without losing it.</li>
+        <li><b>Scan</b> a zone or a band while you listen on another slot.</li>
+        <li><b>Channels in zones</b>, like folders: "Repeaters", "Air", the weather channels. A Nearby list with a
+          GPS fix.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/home.webp" alt="The home screen: slot A on a VFO, B on a repeater, C scanning airband" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/02-mute-off.webp" alt="Slot A muted, slot B turned off" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">Keys</p>
+      <h2>One key layout, learned once</h2>
+      <p>The keys do the same thing on every screen and in every mode. The bar at the bottom always shows what
+        they do next.</p>
+      <ul>
+        <li><b>Quick settings:</b> <kbd>MENU</kbd>, then a digit: squelch, power, mode, tones, offset, step, watch,
+          save, Battery Save.</li>
+        <li><b>Hold a digit</b> for a shortcut: the band scope, power, the tone picker, shift.</li>
+        <li><b>Edit a slot in place:</b> hold <kbd>SLOT</kbd>, and every setting is on one screen.</li>
+        <li><b>The full menu</b> in nine groups, with number paths you can learn: <kbd>MENU</kbd> <kbd>0</kbd>
+          <kbd>5</kbd> <kbd>2</kbd> is always APRS messages.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/01-quick-settings.webp" alt="Quick settings for the active slot" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/01-edit-slot.webp" alt="Editing a slot in place" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Transmit</p>
+      <h2>Talk, and repeaters</h2>
+      <p>FM voice on your region's amateur bands: 2 m, 70 cm, 6 m, 1.25 m where it is allowed, and 17 m to 10 m.
+        You pick the region in setup.</p>
+      <ul>
+        <li><b>The Transmit screen</b> shows the frequency, power, your mic level and the time left. If the radio
+          won't transmit, it says why and which setting fixes it.</li>
+        <li><b>Add a repeater</b> in a few presses: the shift fills in from the band plan.</li>
+        <li><b>Tones</b> (CTCSS and DCS), a <b>tone search</b> for an unknown one, and the 1750 Hz burst.</li>
+        <li><b>Crossband repeater</b> between a VHF and a UHF slot.</li>
+        <li>VOX, mic gain, DTMF, CW ID, busy lockout and a transmit timeout.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/03-transmit.webp" alt="The Transmit screen with mic level and timeout" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/03-crossband.webp" alt="The crossband repeater page" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">APRS</p>
+      <h2>APRS, on the radio itself</h2>
+      <p>APRS mode gives slot C to APRS and decodes it in the background, while A and B stay free for voice.</p>
+      <ul>
+        <li><b>Messages</b> with predictive text and quick replies, retried up to 5 times until acknowledged.</li>
+        <li><b>Stations heard</b>, with distance, direction and route. Save one as a waypoint.</li>
+        <li><b>Beacons</b> by hand, on a timer, or Smart (following your speed), and a list of which digipeaters
+          repeated yours.</li>
+        <li><b>KISS TNC</b> over the cable or Bluetooth, for apps on your computer or phone.</li>
+        <li>FX.25 error correction, digipeating, Mic-E and telemetry.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/05-aprs-card.webp" alt="The APRS slot on the home screen" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/05-heard.webp" alt="Stations heard, with distance and direction" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Listen</p>
+      <h2>Broadcast FM, shortwave and weather</h2>
+      <p>A third receiver chip handles broadcast FM, AM and shortwave on its own.</p>
+      <ul>
+        <li><b>FM broadcast on any slot</b>, with stereo and station text (RDS). Your other slots keep watching;
+          the music goes quiet when one of them receives.</li>
+        <li><b>HF mode</b> for shortwave and the HF amateur bands: AM everywhere, FM from 18 MHz.</li>
+        <li><b>The band scope</b> shows activity around your frequency at a glance.</li>
+        <li><b>Weather radio</b> for the US and Canada, with SAME alerts for your area.</li>
+        <li><b>DTMF digits</b> heard show on the slot's card.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/06-fm.webp" alt="FM broadcast" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/06-hf.webp" alt="HF mode on 31 m" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature flip">
+    <div class="prose">
+      <p class="kicker">GPS and Bluetooth</p>
+      <h2>Where you are, and a link to your computer</h2>
+      <ul>
+        <li><b>GPS</b>: position, grid square, altitude, speed and a sky plot. On Auto, it runs only while
+          something needs your position.</li>
+        <li><b>Waypoints</b> with a dial that turns as you move, and an arrival alarm.</li>
+        <li><b>The clock</b> sets itself from the GPS.</li>
+        <li><b>Bluetooth</b> for Ferrite Console or an APRS app, with an optional PIN.</li>
+        <li><b>Ferrite Console</b> in Chrome or Edge: a live view of the screen, channels with CHIRP CSV import,
+          settings, APRS messages and a map, listening on the computer, and updates.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/07-gps.webp" alt="GPS position, grid square and nearest waypoint" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/07-waypoints.webp" alt="Waypoints, nearest first" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="feature">
+    <div class="prose">
+      <p class="kicker">Power</p>
+      <h2>A battery that lasts</h2>
+      <ul>
+        <li><b>Dynamic clocking:</b> the processor runs at 24 MHz while the radio waits, and at full speed only
+          while something needs it. Nothing to set.</li>
+        <li><b>Battery Save</b> lets the receivers sleep between short checks, at three depths.</li>
+        <li><b>Low Power Mode</b> keeps only what you need to talk on one frequency. On Auto, it comes on by
+          itself below 20 %. Tuning, the menus and editing still work.</li>
+        <li><b>Night red</b> two presses away, and a high-contrast daylight theme for the sun.</li>
+      </ul>
+    </div>
+    <div class="shots"><figure class="screen"><img src="/img/guide/08-low-power.webp" alt="Low Power Mode, one slot in an amber frame" width="240" height="320"></figure><figure class="screen"><img src="/img/guide/08-night-red.webp" alt="The night red theme" width="240" height="320"></figure></div>
+  </section>
+
+  <section class="section column-in" id="why">
+    <div class="prose">
+      <p class="kicker">Why change firmware</p>
+      <h2>Why Ferrite instead of stock</h2>
+      <p>The radio is good hardware. Ferrite is a different idea of how to use it: one fixed key layout, three
+        slots that listen at once, APRS and the decoders on the radio itself, and a lot of attention to battery
+        life. Some things it keeps exactly as they were:</p>
+      <ul>
+        <li><b>Your calibration</b> is used as it is and never erased.</li>
+        <li><b>The radio's own bootloader</b> installs every image and is never changed, so an update can always be
+          tried again.</li>
+        <li><b>Going back</b> is built into Ferrite Console: it writes your old channels and settings back, then
+          the original firmware.</li>
+      </ul>
+      <p>The how-to for every feature is in the <a href="https://ferritefw.dev/manual">user guide</a>.</p>
+    </div>
+  </section>
+
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div>
+      <a class="brand brand-small" href="https://ferritefw.dev/"><svg class="logo" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  <circle cx="60" cy="60" r="38" fill="none" stroke="#9AA3AE" stroke-width="16"/>
+  <g stroke="#4DA3FF" stroke-width="5" stroke-linecap="round">
+    <line x1="43.0" y1="77.0" x2="23.2" y2="96.8"/><line x1="38.1" y1="69.8" x2="12.6" y2="81.3"/>
+    <line x1="36.0" y1="61.4" x2="8.1" y2="63.1"/><line x1="37.1" y1="52.9" x2="10.4" y2="44.5"/>
+    <line x1="41.1" y1="45.2" x2="19.1" y2="27.9"/><line x1="47.6" y1="39.5" x2="33.1" y2="15.5"/>
+    <line x1="55.7" y1="36.4" x2="50.6" y2="8.9"/><line x1="64.3" y1="36.4" x2="69.4" y2="8.9"/>
+    <line x1="72.4" y1="39.5" x2="86.9" y2="15.5"/><line x1="78.9" y1="45.2" x2="100.9" y2="27.9"/>
+    <line x1="82.9" y1="52.9" x2="109.6" y2="44.5"/><line x1="84.0" y1="61.4" x2="111.9" y2="63.1"/>
+    <line x1="81.9" y1="69.8" x2="107.4" y2="81.3"/><line x1="77.0" y1="77.0" x2="96.8" y2="96.8"/>
+  </g>
+</svg>
+<span>Ferrite</span></a>
+      <p>Free radio firmware, with its source public, under the
+        <a href="https://ferritefw.dev/licence/">PolyForm Noncommercial License 1.0.0</a>
+        (<a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">full text</a>). Copyright 2026 Alex Harvey.</p>
+    </div>
+    <ul class="foot-links">
+      <li><a href="https://discord.gg/fYygBVD2Kx">Discord</a>: help and questions</li>
+      <li><a href="https://github.com/FerriteFW/ferrite">Source</a>: the code, free and public</li>
+      <li><a href="https://ferritefw.dev/dev/">Developers</a>: building, the link protocol, file formats</li>
+      <li><a href="https://ferritefw.dev/bench/">Bench &amp; support the project</a></li>
+      <li><a href="https://blog.ferritefw.dev/feed.xml">Blog feed</a></li>
+      <li><a href="https://www.radtels.com/products/radtel-rt-950-pro-27mhz-tx-rx-10w-walkie-talkie-am-fm-usb-lsb-cw-receive-gps-aprs-wireless-bluetooth-phone-programming-noaa-two-way-radio?ref=FERRITEFW&amp;variant=44669996794064" rel="sponsored">Radtel RT-950 Pro</a>: the radio</li>
+    </ul>
+  </div>
+  <div class="wrap fine"><p>An independent project, not made by or affiliated with Radtel. · Visits are counted
+    with <a href="https://www.goatcounter.com">GoatCounter</a>: no cookies, nothing personal kept. ·
+    <span class="ca"><svg class="flag" viewBox="0 0 9600 4800" width="32" height="16" role="img" aria-label="Canada"><path fill="#8a929c" d="M2400 0h4800v4800H2400z"/><path fill="#3d444d" d="M0 0h2400v4800H0zM7200 0h2400v4800H7200z"/><path fill="#3d444d" d="M4890 4430l-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg> Made in Canada</span></p></div>
+</footer>
+<script>window.goatcounter = { path: function (p) { return location.host + p } }</script>
+<script data-goatcounter="https://ferritefw.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

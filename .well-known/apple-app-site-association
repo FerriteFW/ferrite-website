@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["JQQU96SDZE.dev.ferritefw.pocket"],
+        "components": [{ "/": "/s", "comment": "Share codes: a channel or a zone (the code is in the fragment)" }]
+      }
+    ]
+  }
+}
