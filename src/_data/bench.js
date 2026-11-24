@@ -38,6 +38,8 @@ const WISH = [
   { item: "Signal generator", low: null, high: null, why: "A clean, known signal: receiver sensitivity and squelch levels." },
   { item: "Step attenuators", low: null, high: null, why: "Weak-signal tests at known levels." },
   { item: "Rigol RSA804 spectrum analyser", low: 2500, high: 2500, why: "Harmonics and spurious emissions on transmit." },
+  { item: "HackRF Pro", low: 400, high: 400, why: "An SDR that transmits from 100 kHz to 6 GHz: test signals on HF (SSB past 18 MHz) and 2 m, below the bladeRF's 300 MHz." },
+  { item: "Radioddity Trivox", low: null, high: null, why: "A radio that runs the same firmware: making sure Ferrite installs and runs on it, as on the BJ-9000." },
   { item: "iPad mini (A17 Pro, 128 GB)", low: 700, high: 700, why: "Ferrite Console as an iPad app, over Bluetooth: testing it on a real tablet." },
   { item: "Google Pixel 10a (128 GB)", low: 599, high: 599, why: "Ferrite Pocket on Android: its Bluetooth link, maps and notifications tested on a real phone against the radios (the emulator has no Bluetooth)." },
 ];
